@@ -1,0 +1,90 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+  "setuptools-scm",
+]
+
+[project]
+name = "PySelector"
+version = "0.1.0"
+description = "WIP"
+readme = "README.md"
+keywords = [
+  "cli",
+  "dmenu",
+  "fzf",
+  "menu",
+  "rofi",
+  "utility",
+]
+requires-python = ">=3.7"
+
+[tool.black]
+line-length = 88
+
+[tool.mypy]
+show_error_codes = true
+show_error_context = true
+show_column_numbers = true
+ignore_missing_imports = true
+no_strict_optional = true
+
+[tool.pylint]
+max-line-length = 88
+disable = [
+    "C0103", # (invalid-name)
+    "C0114", # (missing-module-docstring)
+    "C0115", # (missing-class-docstring)
+    "C0116", # (missing-function-docstring)
+    "E0401", # (import-error)
+    "R0903", # (too-few-public-methods)
+    "R0913", # (too-many-arguments)
+    "W0105", # (pointless-string-statement)
+    "R0902", # (too-many-instance-attributes)
+    "W0511", # (fixme)
+]
+
+[tool.ruff]
+fix = false
+line-length = 88
+task-tags = ["HACK", "FIX", "BUG", "WIP", "TODO",]
+show-source = true
+show-fixes = true
+target-version = "py37"
+exclude = [
+    ".venv",
+    ".mypy_cache",
+    ".pytest_cache",
+]
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+extend-select = [
+    "B",    # (flake8-bugbear)
+    "BLE",  # (flake8-blind-except)
+    "C4",   # (flake8-comprehensions)
+    "ERA",  # (eradicate)
+    "I",    # (isort)
+    "ICN",  # (flake8-import-conventions)
+    "INP",  # (flake8-no-pep420)
+    "ISC",  # (flake8-implicit-str-concat)
+    "N",    # (pep8-naming)
+    "NPY",  # (numpy-specific-rules)
+    "PGH",  # (pygrep-hooks)
+    "PIE",  # (flake8-pie)
+    "PTH",  # (flake8-use-pathlib)
+    "Q",    # (flake8-quotes)
+    "RET",  # (flake8-return)
+    "RSE",  # (flake8-raise)
+    "RUF",  # (ruff-specific-rules)
+    "S",    # (flake8-bandit)
+    "SIM",  # (flake8-simplify)
+    "T20",  # (flake8-print)
+    "TCH",  # (flake8-type-checking)
+    "TID",  # (flake8-tidy-imports)
+    "YTT",  # (flake8-2020)
+]
+
+[tool.ruff.isort]
+force-single-line = true
+order-by-type = true
