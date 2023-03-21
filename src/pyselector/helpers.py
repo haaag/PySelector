@@ -1,5 +1,6 @@
 # helpers.ey
 
+import logging
 import shutil
 import subprocess
 import sys
@@ -7,12 +8,11 @@ from typing import Iterable
 from typing import Union
 
 from pyselector.interfaces import ExecutableNotFoundError
-from pyselector.logger import get_logger
 
 ENCODE = sys.getdefaultencoding()
 
 
-log = get_logger(__name__)
+log = logging.getLogger(__name__)
 
 
 def check_command(name: str, reference: str) -> str:

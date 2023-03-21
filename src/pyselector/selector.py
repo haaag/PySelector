@@ -2,6 +2,7 @@
 
 import logging
 
+from pyselector import logger
 from pyselector.menus.dmenu import Dmenu
 from pyselector.menus.fzf import Fzf
 from pyselector.menus.rofi import Rofi
@@ -22,10 +23,8 @@ class Menu:
 
     @staticmethod
     def set_logging_level(verbose: bool = False) -> None:
-        format = "[%(levelname)s] %(name)s - %(message)s"
-        level = logging.DEBUG if verbose else logging.INFO
         logging.basicConfig(
-            level=level,
-            format=format,
-            datefmt="[%X]",
+            level=logging.DEBUG if verbose else logging.INFO,
+            format="%(levelname)s %(name)s - %(message)s",
+            handlers=[logger.handler],
         )
