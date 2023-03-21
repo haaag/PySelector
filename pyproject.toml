@@ -1,15 +1,16 @@
 [build-system]
-build-backend = "setuptools.build_meta"
-requires = [
-  "setuptools",
-  "setuptools-scm",
-]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "pyselector"
-version = "0.1.0"
 description = "WIP"
 readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+authors = [
+  { name = "haaag", email = "git.haaag@gmail.com" },
+]
 keywords = [
   "cli",
   "dmenu",
@@ -18,7 +19,27 @@ keywords = [
   "rofi",
   "utility",
 ]
-requires-python = ">=3.7"
+dynamic = ["version"]
+
+Documentation = "https://github.com/haaag/pyselector#readme"
+Issues = "https://github.com/haaag/pyselector/issues"
+Source = "https://github.com/haaag/pyselector"
+
+[project.optional-dependencies]
+build = []
+dev = ["black", "mypy", "pytest", "ruff", "mccabe"]
+
+[tool.hatch.version]
+path = "src/pyselector/__init__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+[tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=pyselector --cov=tests {args}"
+no-cov = "cov --no-cov {args}"
 
 [tool.black]
 line-length = 88
@@ -33,7 +54,7 @@ show_error_context = true
 show_column_numbers = true
 ignore_missing_imports = true
 no_strict_optional = true
-exclude = ["tests"]
+exclude = ["tests", "example.py"]
 
 [tool.pylint]
 max-line-length = 88
@@ -103,3 +124,10 @@ order-by-type = true
 
 [tool.ruff.mccabe]
 max-complexity = 8
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
