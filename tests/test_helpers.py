@@ -26,8 +26,7 @@ def test_check_command_success() -> None:
 def test_check_command_failure() -> None:
     case = Case(input="i_dont_exists", expected=ExecutableNotFoundError)
     with pytest.raises(case.expected):
-        command = helpers.check_command(name=case.input, reference=case.input)
-        assert command is None
+        helpers.check_command(name=case.input, reference=case.input)
 
 
 @pytest.mark.parametrize(

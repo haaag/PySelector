@@ -45,6 +45,22 @@ def test_register_keybind(
     assert registered_keybind == keybind
 
 
+def test_register_and_replace_keybind(
+    key_manager: KeyManager, test_keybind: tuple[str, str, bool]
+) -> None:
+    bind, description, hidden = test_keybind
+    keybind = Keybind(
+        id=1,
+        bind=bind,
+        code=10,
+        description=description,
+        hidden=hidden,
+        callback=lambda: None,
+    )
+    key_manager.register(keybind)
+    key_manager.register(keybind, exist_ok=True)
+
+
 def test_register_existing_keybind(
     key_manager: KeyManager, test_keybind: tuple[str, str, bool]
 ) -> None:
@@ -77,6 +93,11 @@ def test_unregister_keybind(
     key_manager.register(keybind)
     key_manager.unregister(bind)
     assert key_manager.list_registered == []
+
+
+def test_unregister_keybind_error(key_manager: KeyManager) -> None:
+    with pytest.raises(KeybindError):
+        key_manager.unregister("CTRL+XX")
 
 
 def test_toggle_all_keybinds(key_manager: KeyManager) -> None:

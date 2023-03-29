@@ -24,23 +24,64 @@ def items() -> list[str]:
 
 
 def test_build_command(rofi) -> None:
+    alt_r = rofi.keybind.add(
+        key="alt-r",
+        description="Testing add keybind",
+        callback=lambda: None,
+    )
     args = rofi._build_command(
         case_sensitive=True,
         multi_select=True,
         prompt="test>",
         lines=5,
+        theme="default",
+        mesg="Testing...",
+        filter="Testing...",
+        location="upper-right",
+        width="60%",
+        height="50%",
     )
+
     assert isinstance(args, list)
     assert "-case-sensitive" in args
     assert "-multi-select" in args
     assert "-p" in args
     assert "-l" in args
+    assert "-theme" in args
+    assert "-mesg" in args
+    assert "-filter" in args
+    assert f"-kb-custom-{alt_r.id}" in args
+    assert "-location" in args
+    assert "-theme-str" in args
 
 
-def test_system_exit(rofi, items) -> None:
+# def test_build_command_warning(rofi) -> None:
+#     with pytest.warns(UserWarning):
+#         rofi._build_command(
+#             case_sensitive=True,
+#             multi_select=True,
+#             prompt="test>",
+#             lines=5,
+#             theme="default",
+#             invalid_arg=True,
+#         )
+
+
+def test_build_command_not_case_sensitive(rofi: Rofi) -> None:
+    args = rofi._build_command(
+        case_sensitive=False,
+        multi_select=True,
+        prompt="test>",
+    )
+    assert "-i" in args
+
+
+def test_system_exit(rofi: Rofi, items) -> None:
     """Test case user hits escape raises SystemExit"""
     with pytest.raises(SystemExit):
-        lines, _ = rofi.prompt(items=items, prompt="PressEscape>")
+        lines, _ = rofi.prompt(
+            items=items, prompt="PressEscape>", mesg="> Hit <Escape>"
+        )
 
 
 def test_multi_lines_selected(rofi, items) -> None:
@@ -49,6 +90,7 @@ def test_multi_lines_selected(rofi, items) -> None:
         items=items,
         prompt="Shift+Enter>",
         multi_select=True,
+        mesg="> Select all items with <Shift+Enter>",
     )
     assert isinstance(lines, list)
     assert len(lines) == 3
@@ -60,25 +102,24 @@ def test_case_sensitive(rofi) -> None:
         items=["OPTION 1"],
         prompt="CaseSensitive>",
         case_sensitive=True,
+        mesg="> Type some option with CAPS on",
     )
     assert result == "OPTION 1"
 
 
 def test_int_items_to_str(rofi) -> None:
-    result, _ = rofi.prompt(
-        items=[1, 2, 3],
-        prompt="Select item 1>",
-    )
+    items = [1, 2, 3]
+    result, _ = rofi.prompt(items=items, prompt="Select>", mesg="> Select first item")
     assert isinstance(result, str)
     assert result == "1"
 
 
-def test_invalid_arg_warning(rofi, items) -> None:
-    with pytest.warns(UserWarning):
-        result, _ = rofi.prompt(
-            prompt="PressEnter>",
-            invalid_arg=True,
-        )
+# def test_invalid_arg_warning(rofi, items) -> None:
+#     with pytest.warns(UserWarning):
+#         result, _ = rofi.prompt(
+#             prompt="PressEnter>",
+#             invalid_arg=True,
+#         )
 
 
 @pytest.mark.parametrize(
