@@ -1,4 +1,5 @@
 # fzf.py
+from __future__ import annotations
 
 import logging
 import shlex
@@ -7,7 +8,7 @@ from typing import Optional
 from typing import Union
 
 from pyselector import helpers
-from pyselector.interfaces import KeyManager
+from pyselector.key_manager import KeyManager
 
 log = logging.getLogger(__name__)
 
@@ -42,10 +43,11 @@ class Fzf:
             kwargs.pop("cycle")
             args.append("--cycle")
 
-        if kwargs.get("preview") is not None:
-            preview = kwargs.pop("preview")
-            if not preview:
-                args.append("--no-preview")
+        if not kwargs.pop("preview", None):
+            args.append("--no-preview")
+
+        if kwargs.get("height"):
+            args.extend(shlex.split(f"--height {kwargs.pop('height')}"))
 
         if prompt:
             args.extend(["--prompt", prompt])
@@ -53,6 +55,8 @@ class Fzf:
         if multi_select:
             args.append("--multi")
 
+        # FIX: rethink keybinds for FZF
+        log.debug("keybinds are disabled")
         for key in self.keybind.list_registered:
             args.extend(shlex.split(f"--bind='{key.bind}:{key.action}'"))
             if not key.hidden:
@@ -60,7 +64,7 @@ class Fzf:
 
         if kwargs:
             for arg, value in kwargs.items():
-                log.warning("not supported in fzf: %s=%s", arg, value)
+                log.debug("'%s=%s' not supported", arg, value)
 
         if header:
             mesg = "\n".join(msg.replace("\n", " ") for msg in header)

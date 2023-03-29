@@ -1,11 +1,14 @@
 # interface.py
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Optional
 from typing import Protocol
 from typing import Union
 
-from pyselector.key_manager import KeyManager
+if TYPE_CHECKING:
+    from pyselector.key_manager import KeyManager
 
 PromptReturn = tuple[Union[str, list[str]], int]
 

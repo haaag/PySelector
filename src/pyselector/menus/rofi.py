@@ -1,16 +1,20 @@
 # menus.rofi.py
+from __future__ import annotations
 
 import logging
 import shlex
 import sys
-import warnings
+from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Optional
 from typing import Union
 
 from pyselector import helpers
-from pyselector.interfaces import KeyManager
-from pyselector.interfaces import PromptReturn
+from pyselector.key_manager import KeyManager
+
+if TYPE_CHECKING:
+    from pyselector.interfaces import PromptReturn
+
 
 log = logging.getLogger(__name__)
 
@@ -51,18 +55,6 @@ class Rofi:
         prompt,
         **kwargs,
     ) -> list[str]:
-        """Builds a list of arguments to be passed to the rofi command based on
-           the specified parameters and keyword arguments.
-
-        Args:
-            case_sensitive (bool):  Whether to enable case-sensitive filtering.
-            multi_select (bool):    Whether to allow multiple item selection.
-            prompt (str):           The prompt message to display before the input field
-            **kwargs:               Additional keyword arguments.
-
-        Returns:
-            A list of strings representing the rofi command and its arguments.
-        """
         messages: list[str] = []
         dimensions_args: list[str] = []
         args = []
@@ -118,7 +110,7 @@ class Rofi:
 
         if kwargs:
             for arg, value in kwargs.items():
-                warnings.warn(UserWarning(f"'{arg}={value}' not supported"))
+                log.debug("'%s=%s' not supported", arg, value)
 
         args.extend(shlex.split("-theme-str 'textbox { markup: false;}'"))
         return args
@@ -151,7 +143,7 @@ class Rofi:
             theme    (str): The path of the rofi theme to use.
 
         Returns:
-            A tuple containing the selected item (str or list of str) and the return code (int).
+            A tuple containing the selected item (str or list of str if `multi_select` activated) and the return code (int).
         """
         if items is None:
             items = []

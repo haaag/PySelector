@@ -1,15 +1,18 @@
 # dmenu.py
+from __future__ import annotations
 
 import logging
 import shlex
-import warnings
+from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Optional
 from typing import Union
 
 from pyselector import helpers
-from pyselector.interfaces import PromptReturn
 from pyselector.key_manager import KeyManager
+
+if TYPE_CHECKING:
+    from pyselector.interfaces import PromptReturn
 
 log = logging.getLogger(__name__)
 
@@ -23,6 +26,39 @@ class Dmenu:
     @property
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
+
+    def _build_command(
+        self,
+        case_sensitive,
+        multi_select,
+        prompt,
+        **kwargs,
+    ) -> list[str]:
+        args = shlex.split(self.command)
+
+        if kwargs.get("lines"):
+            args.extend(["-l", str(kwargs.pop("lines"))])
+
+        if prompt:
+            args.extend(["-p", prompt])
+
+        if kwargs.get("bottom"):
+            kwargs.pop("bottom")
+            args.append("-b")
+
+        if case_sensitive:
+            args.append("-i")
+
+        if kwargs.get("font"):
+            args.extend(["-fn", kwargs.pop("font")])
+
+        if multi_select:
+            log.warning("not supported in dmenu: %s", "multi-select")
+
+        if kwargs:
+            for arg, value in kwargs.items():
+                log.debug("'%s=%s' not supported", arg, value)
+        return args
 
     def prompt(
         self,
@@ -54,30 +90,7 @@ class Dmenu:
         if items is None:
             items = []
 
-        args = shlex.split(self.command)
-
-        if kwargs.get("lines"):
-            args.extend(["-l", str(kwargs.pop("lines"))])
-
-        if prompt:
-            args.extend(["-p", prompt])
-
-        if kwargs.get("bottom"):
-            kwargs.pop("bottom")
-            args.append("-b")
-
-        if case_sensitive:
-            args.append("-i")
-
-        if kwargs.get("font"):
-            args.extend(["-fn", kwargs.pop("font")])
-
-        if multi_select:
-            log.warning("not supported in dmenu: %s", "multi-select")
-
-        if kwargs:
-            for arg, value in kwargs.items():
-                warnings.warn(UserWarning(f"'{arg}={value}' not supported"))
+        args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
 
         selection, code = helpers._execute(args, items)
         return helpers.parse_bytes_line(selection), code
