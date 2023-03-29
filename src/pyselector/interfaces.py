@@ -30,5 +30,5 @@ class MenuInterface(Protocol):
         multi_select: bool = False,
         prompt: str = "PySelector> ",
         **kwargs,
-    ) -> tuple[Union[str, list[str]], int]:
+    ) -> PromptReturn:
         ...

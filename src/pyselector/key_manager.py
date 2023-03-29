@@ -1,4 +1,5 @@
 # keybinds.py
+from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
@@ -119,12 +120,8 @@ class KeyManager:
         self.keys[key.bind] = key
         return key
 
-    def patch(self, bind: str) -> Keybind:
-        # FIX: delete me
-        key = self.keys.get(bind)
-        if not key:
-            raise KeybindError(f"{bind=} not found")
-        return key
+    # def patch(self, bind: str) -> Keybind:
+    #     if not key:
 
     @property
     def list_registered(self) -> list[Keybind]:

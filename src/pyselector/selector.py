@@ -1,5 +1,7 @@
 # menu.py
 
+from __future__ import annotations
+
 import logging
 
 from pyselector import logger
@@ -22,7 +24,7 @@ class Menu:
         return Fzf()
 
     @staticmethod
-    def set_logging_level(verbose: bool = False) -> None:
+    def logging_debug(verbose: bool = False) -> None:
         logging.basicConfig(
             level=logging.DEBUG if verbose else logging.INFO,
             format="%(levelname)s %(name)s - %(message)s",

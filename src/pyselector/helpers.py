@@ -1,5 +1,7 @@
 # helpers.ey
 
+from __future__ import annotations
+
 import logging
 import shutil
 import subprocess
@@ -51,11 +53,11 @@ def set_clipboard_data(url: str) -> None:
         stdin=subprocess.PIPE,
     ) as proc:
         proc.stdin.write(data)
-        log.debug("Copied '%s' to clipboard", url)
+        log.debug("copied '%s' to clipboard", url)
 
 
 def _execute(args: list[str], items: Iterable[Union[str, int]]) -> tuple[bytes, int]:
-    log.debug("Executing: %s", args)
+    log.debug("executing: %s", args)
     with subprocess.Popen(
         args,
         stdout=subprocess.PIPE,

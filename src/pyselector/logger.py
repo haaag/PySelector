@@ -4,15 +4,24 @@ from __future__ import annotations
 
 import logging
 
-reset_color = "\33[0m"
+
+class C:
+    DEBUG = "\33[37;2m"
+    BOLD_RED = "\033[31;1;6m"
+    RED = "\33[31m"
+    YELLOW = "\33[33m"
+    CYAN = "\33[36m"
+    RESET = "\33[0m"
+
+
 FMT = "[{levelname:^7}] {name}: {message}"
 
 FORMATS = {
-    logging.DEBUG: FMT,
-    logging.INFO: f"\33[36m{FMT}{reset_color}",
-    logging.WARNING: f"\33[33m{FMT}\33[0m",
-    logging.ERROR: f"\33[31m{FMT}\33[0m",
-    logging.CRITICAL: f"\33[1m\33[31m{FMT}\33[0m",
+    logging.DEBUG: f"{C.DEBUG}{FMT}{C.RESET}",
+    logging.INFO: f"{C.CYAN}{FMT}{C.RESET}",
+    logging.WARNING: f"{C.YELLOW}{FMT}{C.RESET}",
+    logging.ERROR: f"{C.RED}{FMT}{C.RESET}",
+    logging.CRITICAL: f"{C.BOLD_RED}{FMT}{C.RESET}",
 }
 
 
