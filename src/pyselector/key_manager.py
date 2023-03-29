@@ -120,16 +120,20 @@ class KeyManager:
         self.keys[key.bind] = key
         return key
 
-    # def patch(self, bind: str) -> Keybind:
-    #     if not key:
+    def patch(self, bind: str) -> Keybind:
+        # FIX: delete me
+        key = self.keys.get(bind)
+        if not key:
+            raise KeybindError(f"{bind=} not found")
+        return key
 
     @property
-    def list_registered(self) -> list[Keybind]:
+    def all_registered(self) -> list[Keybind]:
         return list(self.keys.values())
 
     def toggle_all(self) -> None:
         """Toggles the "hidden" property of all non-hidden keybinds."""
-        for key in self.list_registered:
+        for key in self.all_registered:
             if not key.hidden:
                 key.hidden = True
 
@@ -139,7 +143,7 @@ class KeyManager:
         temporarily stores the original "hidden" state of each keybind.
         If `restore` is True, restores the original "hidden" state of each keybind.
         """
-        for key in self.list_registered:
+        for key in self.all_registered:
             if not key.hidden:
                 key.toggle_hidden()
                 self.temp_hidden.append(key)

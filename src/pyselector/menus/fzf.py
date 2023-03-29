@@ -57,7 +57,7 @@ class Fzf:
 
         # FIX: rethink keybinds for FZF
         log.debug("keybinds are disabled")
-        for key in self.keybind.list_registered:
+        for key in self.keybind.all_registered:
             args.extend(shlex.split(f"--bind='{key.bind}:{key.action}'"))
             if not key.hidden:
                 header.append(f"Use {key.bind} {key.description}")

@@ -99,7 +99,7 @@ class Rofi:
             formated_string = " ".join(dimensions_args)
             args.extend(shlex.split("-theme-str 'window {" + formated_string + "}'"))
 
-        for key in self.keybind.list_registered:
+        for key in self.keybind.all_registered:
             args.extend(shlex.split(f"-kb-custom-{key.id} {key.bind}"))
             if not key.hidden:
                 messages.append(f"{BULLET} Use <{key.bind}> {key.description}")
