@@ -46,7 +46,7 @@ class Dmenu:
             kwargs.pop("bottom")
             args.append("-b")
 
-        if case_sensitive:
+        if not case_sensitive:
             args.append("-i")
 
         if kwargs.get("font"):
@@ -55,9 +55,12 @@ class Dmenu:
         if multi_select:
             log.warning("not supported in dmenu: %s", "multi-select")
 
+        for key in self.keybind.registered_keys:
+            log.warning("key=%s not supported in dmenu", key)
+
         if kwargs:
             for arg, value in kwargs.items():
-                log.debug("'%s=%s' not supported", arg, value)
+                log.warning("'%s=%s' not supported", arg, value)
         return args
 
     def prompt(

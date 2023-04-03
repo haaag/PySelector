@@ -22,4 +22,4 @@ from __future__ import annotations
 
 from .selector import Menu as Menu
 
-__version__ = "0.0.7b0"
+__version__ = "0.0.10"

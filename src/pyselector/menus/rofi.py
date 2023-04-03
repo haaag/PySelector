@@ -61,6 +61,7 @@ class Rofi:
 
         args.extend(shlex.split(self.command))
         args.append("-dmenu")
+        args.append("-sync")
 
         if kwargs.get("theme"):
             args.extend(["-theme", kwargs.pop("theme")])
@@ -70,6 +71,10 @@ class Rofi:
 
         if prompt:
             args.extend(["-p", prompt])
+
+        if kwargs.get("markup"):
+            del kwargs["markup"]
+            args.append("-markup-rows")
 
         if kwargs.get("mesg"):
             messages.extend(shlex.split(f"'{kwargs.pop('mesg')}'"))
@@ -99,7 +104,7 @@ class Rofi:
             formated_string = " ".join(dimensions_args)
             args.extend(shlex.split("-theme-str 'window {" + formated_string + "}'"))
 
-        for key in self.keybind.all_registered:
+        for key in self.keybind.registered_keys:
             args.extend(shlex.split(f"-kb-custom-{key.id} {key.bind}"))
             if not key.hidden:
                 messages.append(f"{BULLET} Use <{key.bind}> {key.description}")
@@ -112,7 +117,15 @@ class Rofi:
             for arg, value in kwargs.items():
                 log.debug("'%s=%s' not supported", arg, value)
 
-        args.extend(shlex.split("-theme-str 'textbox { markup: false;}'"))
+        # FIX:
+        # if kwargs.get("title_markup"):
+        #     log.error(kwargs.get("title_markup"))
+        #     args.extend(shlex.split("-theme-str 'textbox { markup: true;}'"))
+        # else:
+        #     args.extend(shlex.split("-theme-str 'textbox { markup: false;}'"))
+        title_markup = "true" if kwargs.pop("title_markup", False) else "false"
+        args.extend(shlex.split(f"-theme-str 'textbox {{ markup: {title_markup};}}'"))
+
         return args
 
     def prompt(
@@ -143,7 +156,12 @@ class Rofi:
             theme    (str): The path of the rofi theme to use.
 
         Returns:
-            A tuple containing the selected item (str or list of str if `multi_select` activated) and the return code (int).
+            A tuple containing the selected item (str or list of str if `multi_select` enabled) and the return code (int).
+
+        Return Code Value
+            0: Row has been selected accepted by user.
+            1: User cancelled the selection.
+            10-28: Row accepted by custom keybinding.
         """
         if items is None:
             items = []
