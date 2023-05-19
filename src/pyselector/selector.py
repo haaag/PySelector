@@ -9,6 +9,12 @@ from pyselector.menus.dmenu import Dmenu
 from pyselector.menus.fzf import Fzf
 from pyselector.menus.rofi import Rofi
 
+menus: dict[str, Menu] = {
+    "dmenu": Dmenu,
+    "rofi": Rofi,
+    "fzf": Fzf,
+}
+
 
 class Menu:
     @staticmethod
@@ -22,6 +28,10 @@ class Menu:
     @staticmethod
     def fzf() -> Fzf:
         return Fzf()
+
+    @staticmethod
+    def menu_list() -> list[str]:
+        return list(menus.keys())
 
     @staticmethod
     def logging_debug(verbose: bool = False) -> None:

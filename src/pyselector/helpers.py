@@ -11,7 +11,7 @@ from typing import Union
 
 from pyselector.interfaces import ExecutableNotFoundError
 
-ENCODE = sys.getdefaultencoding()
+# ENCODE = sys.getdefaultencoding()
 
 
 log = logging.getLogger(__name__)
@@ -27,6 +27,7 @@ def check_command(name: str, reference: str) -> str:
 
 
 def parse_bytes_line(b: bytes) -> str:
+    # string = " ".join(b.decode(encoding="utf-8").split())
     return " ".join(b.decode(encoding="utf-8").split())
 
 
@@ -64,11 +65,11 @@ def _execute(args: list[str], items: Iterable[Union[str, int]]) -> tuple[bytes, 
         stdin=subprocess.PIPE,
     ) as proc:
         items_str = list(map(str, items))
-        bytes_items = "\n".join(items_str).encode(encoding=ENCODE)
+        bytes_items = "\n".join(items_str).encode(encoding="utf-8")
         selected, _ = proc.communicate(input=bytes_items)
         return_code = proc.wait()
 
     if not selected:
-        sys.exit(1)
-
+        sys.exit(0)
+    log.debug("item selected: %s", selected)
     return selected, return_code

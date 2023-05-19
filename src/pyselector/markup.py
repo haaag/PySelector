@@ -1,4 +1,5 @@
 # markup.py
+# https://docs.gtk.org/Pango/pango_markup.html
 
 from __future__ import annotations
 
@@ -49,6 +50,14 @@ class PangoSpan:
     underline_color: Optional[str] = None
     variant: Optional[str] = None
     weight: Optional[str] = None
+
+    def __hash__(self):
+        attrs = tuple(
+            self.__dict__[attr]
+            for attr in sorted(self.__dict__.keys())
+            if attr != "text" and attr != "sub"
+        )
+        return hash((self.text, attrs))
 
     def __str__(self):
         attrs = []

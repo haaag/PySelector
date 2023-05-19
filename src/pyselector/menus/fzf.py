@@ -58,14 +58,14 @@ class Fzf:
         # FIX: rethink keybinds for FZF
         # log.warning("keybinds are disabled")
         for key in self.keybind.registered_keys:
-            log.warning("key=%s not supported in fzf", key)
+            log.debug("key=%s not supported in fzf", key)
             # args.extend(shlex.split(f"--bind='{key.bind}:{key.action}'"))
             # if not key.hidden:
             #     header.append(f"Use {key.bind} {key.description}")
 
         if kwargs:
             for arg, value in kwargs.items():
-                log.warning("'%s=%s' not supported", arg, value)
+                log.debug("'%s=%s' not supported", arg, value)
 
         if header:
             mesg = "\n".join(msg.replace("\n", " ") for msg in header)

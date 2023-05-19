@@ -53,14 +53,14 @@ class Dmenu:
             args.extend(["-fn", kwargs.pop("font")])
 
         if multi_select:
-            log.warning("not supported in dmenu: %s", "multi-select")
+            log.debug("not supported in dmenu: %s", "multi-select")
 
         for key in self.keybind.registered_keys:
-            log.warning("key=%s not supported in dmenu", key)
+            log.debug("key=%s not supported in dmenu", key)
 
         if kwargs:
             for arg, value in kwargs.items():
-                log.warning("'%s=%s' not supported", arg, value)
+                log.debug("'%s=%s' not supported", arg, value)
         return args
 
     def prompt(

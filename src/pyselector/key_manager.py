@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 from typing import Callable
 from typing import Optional
+
+log = logging.getLogger(__name__)
 
 
 class KeybindError(Exception):
@@ -40,7 +43,15 @@ class Keybind:
     callback: Optional[Callable[..., Any]] = None
 
     def toggle_hidden(self) -> None:
+        """Toggles the visibility of the keybind in the user interface."""
+        log.debug("Toggling keybind=%s %s", self.hidden, self.bind)
         self.hidden = not self.hidden
+
+    def show(self) -> None:
+        self.hidden = True
+
+    def hide(self) -> None:
+        self.hidden = False
 
     def __hash__(self):
         return hash((self.code, self.description))
@@ -62,8 +73,7 @@ class KeyManager:
         self.keys: dict[int, Keybind] = {}
         self.key_count = 1
         self.code_count = 1
-        self.temp_hidden: list[Keybind] = []
-        self.original_states: dict[Keybind, bool] = {}
+        self.original_states: list[Keybind] = []
 
     def add(
         self,
@@ -96,15 +106,17 @@ class KeyManager:
             exist_ok=exist_ok,
         )
 
-    def unregister(self, code: int) -> None:
+    def unregister(self, code: int) -> Keybind:
         """Removes the keybind with the specified bind."""
         if not self.keys.get(code):
             raise KeybindError(f"No keybind found with {code=}")
-        self.keys.pop(code)
+        return self.keys.pop(code)
 
-    def unregister_all(self) -> None:
+    def unregister_all(self) -> list[Keybind]:
         """Removes all registered keybinds."""
+        keys = list(self.keys.values())
         self.keys.clear()
+        return keys
 
     def register(self, key: Keybind, exist_ok: bool = False) -> Keybind:
         """
@@ -122,6 +134,7 @@ class KeyManager:
             self.unregister(key.code)
 
         if self.keys.get(key.code):
+            log.error("%s already registered", key.bind)
             raise KeybindError(f"{key.bind=} already registered")
 
         self.key_count += 1
@@ -148,34 +161,22 @@ class KeyManager:
         for key in self.registered_keys:
             if not key.hidden:
                 key.toggle_hidden()
-                self.temp_hidden.append(key)
+                self.original_states.append(key)
         if restore:
-            for key in self.temp_hidden:
+            for key in self.original_states:
                 key.toggle_hidden()
-            self.temp_hidden = []
+            self.original_states = []
 
-    def toggle_nonhidden_keys(self, restore: bool = False) -> None:
-        """
-        Toggles the "hidden" property of all non-hidden keybinds, and temporarily
-        stores the original "hidden" state of each keybind. If `restore` is True,
-        restores the original "hidden" state of each keybind.
-        """
-        if not restore:
-            self.original_states = {
-                key: key.hidden for key in self.registered_keys if not key.hidden
-            }
-
-        for key in self.registered_keys:
-            if not key.hidden:
-                key.toggle_hidden()
-
-        if restore:
-            try:
-                for key, state in self.original_states.items():
-                    if state:
-                        key.toggle_hidden()
-            finally:
-                self.original_states.clear()
+    # def unregister_all(self, restore: bool = False) -> List[Keybind]:
+    #     """Removes all registered keybinds."""
+    #     keys = list(self.keys.values())
+    #     if restore:
+    #         self.keys.clear()
+    #         for keybind in keys:
+    #             self.register(keybind)
+    #     else:
+    #         self.keys.clear()
+    #     return keys
 
     def get_keybind_by_code(self, code: int) -> Keybind:
         """
@@ -188,3 +189,15 @@ class KeyManager:
             return self.keys[code]
         except KeyError:
             raise KeybindError(f"No keybind found with {code=}") from None
+
+    def get_keybind_by_bind(self, bind: str) -> Keybind:
+        """
+        Returns the keybind with the <bind> specified.
+
+        Raises:
+            KeybindError: If no keybind is found with the specified bind.
+        """
+        for key in self.registered_keys:
+            if key.bind == bind:
+                return key
+        raise KeybindError(f"No keybind found with {bind=}") from None
