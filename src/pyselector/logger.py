@@ -14,7 +14,7 @@ class C:
     RESET = "\33[0m"
 
 
-FMT = "[{levelname:^7}] {name}: {message}"
+FMT = "[{levelname:^7}] {name:<30}: {message} (line:{lineno})"
 
 FORMATS = {
     logging.DEBUG: f"{C.DEBUG}{FMT}{C.RESET}",
