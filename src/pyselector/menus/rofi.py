@@ -9,6 +9,7 @@ from typing import Iterable
 from typing import Optional
 from typing import Union
 
+from pyselector import constants
 from pyselector import helpers
 from pyselector.key_manager import KeyManager
 
@@ -39,7 +40,7 @@ class Rofi:
 
     def __init__(self) -> None:
         self.name = "rofi"
-        self.url = "https://github.com/davatorium/rofi"
+        self.url = constants.HOMEPAGE_ROFI
         self.keybind = KeyManager()
 
         self.keybind.code_count = ROFI_RETURN_CODE_START
@@ -117,12 +118,6 @@ class Rofi:
             for arg, value in kwargs.items():
                 log.debug("'%s=%s' not supported", arg, value)
 
-        # FIX:
-        # if kwargs.get("title_markup"):
-        #     log.error(kwargs.get("title_markup"))
-        #     args.extend(shlex.split("-theme-str 'textbox { markup: true;}'"))
-        # else:
-        #     args.extend(shlex.split("-theme-str 'textbox { markup: false;}'"))
         title_markup = "true" if kwargs.pop("title_markup", False) else "false"
         args.extend(shlex.split(f"-theme-str 'textbox {{ markup: {title_markup};}}'"))
 

@@ -8,6 +8,7 @@ from typing import Iterable
 from typing import Optional
 from typing import Union
 
+from pyselector import constants
 from pyselector import helpers
 from pyselector.key_manager import KeyManager
 
@@ -20,7 +21,7 @@ log = logging.getLogger(__name__)
 class Dmenu:
     def __init__(self) -> None:
         self.name = "dmenu"
-        self.url = "https://tools.suckless.org/dmenu/"
+        self.url = constants.HOMEPAGE_DMENU
         self.keybind = KeyManager()
 
     @property
