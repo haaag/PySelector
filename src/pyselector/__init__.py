@@ -20,6 +20,13 @@ selected_option, keycode = menu.prompt(options)
 """
 from __future__ import annotations
 
+from .menus.dmenu import Dmenu
+from .menus.fzf import Fzf
+from .menus.rofi import Rofi
 from .selector import Menu as Menu
 
-__version__ = "0.0.12"
+Menu.register("dmenu", Dmenu)
+Menu.register("rofi", Rofi)
+Menu.register("fzf", Fzf)
+
+__version__ = "0.0.14b0"

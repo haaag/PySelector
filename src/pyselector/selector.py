@@ -3,35 +3,45 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
+from typing import Protocol
+from typing import Type
 
 from pyselector import logger
-from pyselector.menus.dmenu import Dmenu
-from pyselector.menus.fzf import Fzf
-from pyselector.menus.rofi import Rofi
 
-menus: dict[str, Menu] = {
-    "dmenu": Dmenu,
-    "rofi": Rofi,
-    "fzf": Fzf,
-}
+if TYPE_CHECKING:
+    from pyselector.key_manager import KeyManager
+
+
+class MenuInterface(Protocol):
+    name: str
+    url: str
+    keybind: KeyManager
+
+    @property
+    def command(self) -> str:
+        raise NotImplementedError
+
+
+REGISTERED_MENUS: dict[str, Type[MenuInterface]] = {}
 
 
 class Menu:
     @staticmethod
-    def rofi() -> Rofi:
-        return Rofi()
+    def register(name: str, menu: Type[MenuInterface]) -> None:
+        REGISTERED_MENUS[name] = menu
 
     @staticmethod
-    def dmenu() -> Dmenu:
-        return Dmenu()
+    def registered() -> dict[str, Type[MenuInterface]]:
+        return REGISTERED_MENUS
 
     @staticmethod
-    def fzf() -> Fzf:
-        return Fzf()
-
-    @staticmethod
-    def menu_list() -> list[str]:
-        return list(menus.keys())
+    def get(name: str) -> Type[MenuInterface]:
+        try:
+            menu = REGISTERED_MENUS[name]
+        except KeyError as e:
+            raise ValueError(f"Unknown menu: {name!r}") from e
+        return menu
 
     @staticmethod
     def logging_debug(verbose: bool = False) -> None:

@@ -15,7 +15,7 @@ class KeybindError(Exception):
     pass
 
 
-@dataclass(kw_only=True)
+@dataclass()
 class Keybind:
     """
     Represents a keybind, which associates a keyboard key or
