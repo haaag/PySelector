@@ -36,12 +36,12 @@ class Menu:
         return REGISTERED_MENUS
 
     @staticmethod
-    def get(name: str) -> Type[MenuInterface]:
+    def get(name: str) -> MenuInterface:
         try:
             menu = REGISTERED_MENUS[name]
         except KeyError as e:
             raise ValueError(f"Unknown menu: {name!r}") from e
-        return menu
+        return menu()
 
     @staticmethod
     def logging_debug(verbose: bool = False) -> None:

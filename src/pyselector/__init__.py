@@ -29,4 +29,4 @@ Menu.register("dmenu", Dmenu)
 Menu.register("rofi", Rofi)
 Menu.register("fzf", Fzf)
 
-__version__ = "0.0.14b0"
+__version__ = "0.0.15b1"

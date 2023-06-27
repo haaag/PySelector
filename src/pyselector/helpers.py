@@ -27,7 +27,6 @@ def check_command(name: str, reference: str) -> str:
 
 
 def parse_bytes_line(b: bytes) -> str:
-    # string = " ".join(b.decode(encoding="utf-8").split())
     return " ".join(b.decode(encoding="utf-8").split())
 
 
