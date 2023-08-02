@@ -23,10 +23,10 @@ from __future__ import annotations
 from .menus.dmenu import Dmenu
 from .menus.fzf import Fzf
 from .menus.rofi import Rofi
-from .selector import Menu as Menu
+from .selector import Menu
 
 Menu.register("dmenu", Dmenu)
 Menu.register("rofi", Rofi)
 Menu.register("fzf", Fzf)
 
-__version__ = "0.0.16"
+__version__ = "0.0.17"

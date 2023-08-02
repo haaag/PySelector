@@ -4,35 +4,26 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
-from typing import Protocol
-from typing import Type
 
 from pyselector import logger
 
 if TYPE_CHECKING:
-    from pyselector.key_manager import KeyManager
+    from pyselector.interfaces import MenuInterface
+
+log = logging.getLogger(__name__)
 
 
-class MenuInterface(Protocol):
-    name: str
-    url: str
-    keybind: KeyManager
-
-    @property
-    def command(self) -> str:
-        raise NotImplementedError
-
-
-REGISTERED_MENUS: dict[str, Type[MenuInterface]] = {}
+REGISTERED_MENUS: dict[str, type[MenuInterface]] = {}
 
 
 class Menu:
     @staticmethod
-    def register(name: str, menu: Type[MenuInterface]) -> None:
+    def register(name: str, menu: type[MenuInterface]) -> None:
+        log.debug(f"Menu.register.keybind: {name =} {menu.keybind =}")
         REGISTERED_MENUS[name] = menu
 
     @staticmethod
-    def registered() -> dict[str, Type[MenuInterface]]:
+    def registered() -> dict[str, type[MenuInterface]]:
         return REGISTERED_MENUS
 
     @staticmethod
@@ -40,7 +31,9 @@ class Menu:
         try:
             menu = REGISTERED_MENUS[name]
         except KeyError as e:
-            raise ValueError(f"Unknown menu: {name!r}") from e
+            err_msg = f"Unknown menu: {name!r}"
+            log.error(err_msg)
+            raise ValueError(err_msg) from e
         return menu()
 
     @staticmethod
