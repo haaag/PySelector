@@ -169,7 +169,7 @@ class Rofi:
         return helpers.parse_bytes_line(selection), code
 
     @staticmethod
-    def location(direction: Optional[str] = None) -> str:
+    def location(direction: str = "center") -> str:
         """
         Specify where the window should be located. The numbers map to the
         following locations on screen:
