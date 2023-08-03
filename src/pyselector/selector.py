@@ -19,7 +19,7 @@ REGISTERED_MENUS: dict[str, type[MenuInterface]] = {}
 class Menu:
     @staticmethod
     def register(name: str, menu: type[MenuInterface]) -> None:
-        log.debug(f"Menu.register.keybind: {name =} {menu.keybind =}")
+        log.debug(f"Menu.register: {name =}")
         REGISTERED_MENUS[name] = menu
 
     @staticmethod
