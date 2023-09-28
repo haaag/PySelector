@@ -161,11 +161,18 @@ class Rofi:
             items = []
 
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
-        selection, code = helpers._execute(args, items)
+        selected, code = helpers._execute(args, items)
 
-        if not selection:
-            return "", code
-        return selection, code
+        if not selected:
+            return None, code
+
+        result = helpers.parse_selected_items(items, selected)
+
+        if not result:
+            return None, 1
+        if not multi_select:
+            return result[0], code
+        return result, code
 
     @staticmethod
     def location(direction: str = "center") -> str:

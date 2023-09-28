@@ -84,11 +84,29 @@ class Fzf:
         prompt: str = "PySelector> ",
         **kwargs,
     ) -> PromptReturn:
+        """
+        EXIT STATUS
+            0      Normal exit
+            1      No match
+            2      Error
+            130    Interrupted with CTRL-C or ESC
+        """
+        fzf_interrupted_code = 130
+
         if not items:
             items = []
 
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
-        selection, code = helpers._execute(args, items)
-        log.debug("selection=%s", selection)
-        log.debug("code=%s", code)
-        return selection, code
+        selected, code = helpers._execute(args, items)
+
+        if code == fzf_interrupted_code:
+            return None, 1
+
+        if not selected:
+            return None, code
+
+        result = helpers.parse_selected_items(items, selected)
+
+        if not result:
+            return None, 1
+        return result[0], code

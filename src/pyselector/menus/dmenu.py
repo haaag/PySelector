@@ -93,6 +93,13 @@ class Dmenu:
             items = []
 
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
+        selected, code = helpers._execute(args, items)
 
-        selection, code = helpers._execute(args, items)
-        return selection, code
+        if not selected:
+            return None, code
+
+        result = helpers.parse_selected_items(items, selected)
+
+        if not result:
+            return None, 1
+        return result[0], code

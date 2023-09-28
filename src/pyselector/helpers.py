@@ -30,7 +30,7 @@ def parse_multiple_bytes_lines(b: bytes) -> list[str]:
     return [" ".join(line.split()) for line in multi]
 
 
-def _execute(args: list[str], items: list[Any] | tuple[Any]) -> tuple[Any | None, int]:
+def _execute(args: list[str], items: list[Any] | tuple[Any]) -> tuple[str | None, int]:
     # TODO: Add callback to process `items`
     # Example:
     # lambda item: f'{item.id} - {item.body}'
@@ -48,13 +48,19 @@ def _execute(args: list[str], items: list[Any] | tuple[Any]) -> tuple[Any | None
     if return_code == UserCancelSelection(1):
         return None, return_code
 
-    selected = selected.replace("\n", "")
+    return selected, return_code
 
+
+def parse_selected_items(items: tuple[Any], selected: str) -> list[Any]:
+    selected_clean = tuple(item for item in selected.split("\n") if item)
+    input_items = "\n".join(map(str, items))
+    items_str = input_items.split("\n")
+
+    result = []
     try:
-        idx = input_items.split("\n").index(selected)
-        selected_item = items[idx]
+        for selection in selected_clean:
+            idx = items_str.index(selection)
+            result.append(items[idx])
     except ValueError as err:
         log.error(err)
-        selected_item = selected
-    log.debug("item selected: %s", selected_item)
-    return selected_item, return_code
+    return result
