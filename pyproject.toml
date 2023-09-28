@@ -16,7 +16,7 @@ keywords = [
   "rofi",
   "utility",
 ]
-license = "MIT"
+license = { file = "LICENSE.txt" }
 authors = [
   { name = "haaag", email = "git.haaag@gmail.com" },
 ]
@@ -24,6 +24,8 @@ requires-python = ">=3.7"
 dynamic = [
   "version",
 ]
+
+[project.urls]
 Documentation = "https://github.com/haaag/pyselector#readme"
 Issues = "https://github.com/haaag/pyselector/issues"
 Source = "https://github.com/haaag/pyselector"
@@ -122,7 +124,7 @@ extend-select = [
     "B",    # (flake8-bugbear)
     "BLE",  # (flake8-blind-except)
     "C4",   # (flake8-comprehensions)
-    "ERA",  # (eradicate)
+    # "ERA",  # (eradicate)
     "I",    # (isort)
     "ICN",  # (flake8-import-conventions)
     "INP",  # (flake8-no-pep420)
@@ -154,4 +156,6 @@ required-imports = ["from __future__ import annotations"]
 "src/pyselector/menus/rofi.py" = ["E501"]  # (line too long)
 "src/pyselector/menus/dmenu.py" = ["E501"]  # (line too long)
 "src/pyselector/key_manager.py" = ["E501"]  # (line too long)
+"src/pyselector/helpers.py" = ["S603"]  # (line too long)
+"**/*" = ["FBT001", "FBT002"]
 "tests/*" = ["S101"]  # (use of assert detected)

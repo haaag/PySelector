@@ -2,15 +2,16 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from typing import Iterable
-from typing import Optional
+from typing import Any
+from typing import NewType
 from typing import Protocol
-from typing import Union
 
 if TYPE_CHECKING:
     from pyselector.key_manager import KeyManager
 
-PromptReturn = tuple[Union[str, list[str]], int]
+PromptReturn = tuple[Any, int]
+UserConfirmsSelection = NewType("UserConfirmsSelection", int)
+UserCancelSelection = NewType("UserCancelSelection", int)
 
 
 class ExecutableNotFoundError(Exception):
@@ -28,8 +29,8 @@ class MenuInterface(Protocol):
 
     def prompt(
         self,
-        items: Optional[Iterable[Union[str, int]]] = None,
-        case_sensitive: Optional[bool] = None,
+        items: list[Any] | tuple[Any] | None = None,
+        case_sensitive: bool | None = None,
         multi_select: bool = False,
         prompt: str = "PySelector> ",
         **kwargs,

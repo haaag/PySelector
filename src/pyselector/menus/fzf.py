@@ -3,13 +3,15 @@ from __future__ import annotations
 
 import logging
 import shlex
-from typing import Iterable
-from typing import Optional
-from typing import Union
+from typing import TYPE_CHECKING
+from typing import Any
 
 from pyselector import constants
 from pyselector import helpers
 from pyselector.key_manager import KeyManager
+
+if TYPE_CHECKING:
+    from pyselector.interfaces import PromptReturn
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ class Fzf:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_command(
+    def _build_command(  # noqa: C901
         self,
         case_sensitive,
         multi_select,
@@ -76,12 +78,12 @@ class Fzf:
 
     def prompt(
         self,
-        items: Optional[Iterable[Union[str, int]]] = None,
-        case_sensitive: Optional[bool] = None,
+        items: list[Any] | tuple[Any] | None = None,
+        case_sensitive: bool | None = None,
         multi_select: bool = False,
         prompt: str = "PySelector> ",
         **kwargs,
-    ) -> tuple[Union[str, list[str]], int]:
+    ) -> PromptReturn:
         if not items:
             items = []
 
@@ -89,7 +91,4 @@ class Fzf:
         selection, code = helpers._execute(args, items)
         log.debug("selection=%s", selection)
         log.debug("code=%s", code)
-
-        if multi_select:
-            return helpers.parse_multiple_bytes_lines(selection), code
-        return helpers.parse_bytes_line(selection), code
+        return selection, code

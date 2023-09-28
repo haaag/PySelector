@@ -5,9 +5,7 @@ import logging
 import shlex
 import sys
 from typing import TYPE_CHECKING
-from typing import Iterable
-from typing import Optional
-from typing import Union
+from typing import Any
 
 from pyselector import constants
 from pyselector import helpers
@@ -49,7 +47,8 @@ class Rofi:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_command(
+    def _build_command(  # noqa: PLR0912, C901
+        # TODO: Break this function
         self,
         case_sensitive,
         multi_select,
@@ -102,8 +101,8 @@ class Rofi:
             args.append("-multi-select")
 
         if dimensions_args:
-            formated_string = " ".join(dimensions_args)
-            args.extend(shlex.split("-theme-str 'window {" + formated_string + "}'"))
+            formatted_string = " ".join(dimensions_args)
+            args.extend(shlex.split("-theme-str 'window {" + formatted_string + "}'"))
 
         for key in self.keybind.registered_keys:
             args.extend(shlex.split(f"-kb-custom-{key.id} {key.bind}"))
@@ -125,7 +124,7 @@ class Rofi:
 
     def prompt(
         self,
-        items: Optional[Iterable[Union[str, int]]] = None,
+        items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = "PySelector> ",
@@ -164,9 +163,9 @@ class Rofi:
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
         selection, code = helpers._execute(args, items)
 
-        if multi_select:
-            return helpers.parse_multiple_bytes_lines(selection), code
-        return helpers.parse_bytes_line(selection), code
+        if not selection:
+            return "", code
+        return selection, code
 
     @staticmethod
     def location(direction: str = "center") -> str:
@@ -194,7 +193,6 @@ class Rofi:
             }
             return str(location[direction])
         except KeyError as e:
-            raise KeyError(
-                "location %s not found.\nchosse from %s", e, list(location.keys())
-            ) from e
+            msg = "location %s not found.\nchosse from %s"
+            raise KeyError(msg, e, list(location.keys())) from e
             sys.exit(1)

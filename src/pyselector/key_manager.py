@@ -6,7 +6,6 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 from typing import Callable
-from typing import Optional
 
 log = logging.getLogger(__name__)
 
@@ -34,13 +33,13 @@ class Keybind:
         toggle_hidden(): Toggles the visibility of the keybind in the user interface.
     """
 
-    id: int
+    id: int  # noqa: A003
     bind: str
     code: int
     description: str
-    action: Optional[str] = ""
+    action: str | None = ""
     hidden: bool = True
-    callback: Optional[Callable[..., Any]] = None
+    callback: Callable[..., Any] | None = None
 
     def toggle_hidden(self) -> None:
         """Toggles the visibility of the keybind in the user interface."""
@@ -75,7 +74,7 @@ class KeyManager:
         self.code_count = 1
         self.original_states: list[Keybind] = []
 
-    def add(
+    def add(  # noqa: PLR0913
         self,
         key: str,
         description: str,
@@ -83,6 +82,7 @@ class KeyManager:
         hidden: bool = False,
         exist_ok: bool = False,
     ) -> Keybind:
+        # FIX: Break this function
         """
         Registers a new keybind with the specified bind and description,
         and associates it with the specified callback function.
@@ -109,7 +109,9 @@ class KeyManager:
     def unregister(self, code: int) -> Keybind:
         """Removes the keybind with the specified bind."""
         if not self.keys.get(code):
-            raise KeybindError(f"No keybind found with {code=}")
+            err_msg = f"No keybind found with {code=}"
+            log.error(err_msg)
+            raise KeybindError(err_msg)
         return self.keys.pop(code)
 
     def unregister_all(self) -> list[Keybind]:
@@ -135,7 +137,8 @@ class KeyManager:
 
         if self.keys.get(key.code):
             log.error("%s already registered", key.bind)
-            raise KeybindError(f"{key.bind=} already registered")
+            msg = f"{key.bind=} already registered"
+            raise KeybindError(msg)
 
         self.key_count += 1
         self.code_count += 1
@@ -167,17 +170,6 @@ class KeyManager:
                 key.toggle_hidden()
             self.original_states = []
 
-    # def unregister_all(self, restore: bool = False) -> List[Keybind]:
-    #     """Removes all registered keybinds."""
-    #     keys = list(self.keys.values())
-    #     if restore:
-    #         self.keys.clear()
-    #         for keybind in keys:
-    #             self.register(keybind)
-    #     else:
-    #         self.keys.clear()
-    #     return keys
-
     def get_keybind_by_code(self, code: int) -> Keybind:
         """
         Returns the keybind with the specified code.
@@ -188,7 +180,8 @@ class KeyManager:
         try:
             return self.keys[code]
         except KeyError:
-            raise KeybindError(f"No keybind found with {code=}") from None
+            msg = f"No keybind found with {code=}"
+            raise KeybindError(msg) from None
 
     def get_keybind_by_bind(self, bind: str) -> Keybind:
         """
@@ -200,4 +193,5 @@ class KeyManager:
         for key in self.registered_keys:
             if key.bind == bind:
                 return key
-        raise KeybindError(f"No keybind found with {bind=}") from None
+        msg = f"No keybind found with {bind=}"
+        raise KeybindError(msg) from None

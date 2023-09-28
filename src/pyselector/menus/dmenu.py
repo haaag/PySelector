@@ -4,9 +4,7 @@ from __future__ import annotations
 import logging
 import shlex
 from typing import TYPE_CHECKING
-from typing import Iterable
-from typing import Optional
-from typing import Union
+from typing import Any
 
 from pyselector import constants
 from pyselector import helpers
@@ -66,7 +64,7 @@ class Dmenu:
 
     def prompt(
         self,
-        items: Optional[Iterable[Union[str, int]]] = None,
+        items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = "PySelector> ",
@@ -97,4 +95,4 @@ class Dmenu:
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
 
         selection, code = helpers._execute(args, items)
-        return helpers.parse_bytes_line(selection), code
+        return selection, code
