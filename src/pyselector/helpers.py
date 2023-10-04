@@ -47,20 +47,19 @@ def _execute(args: list[str], items: list[Any] | tuple[Any]) -> tuple[str | None
         return None, return_code
     if return_code == UserCancelSelection(1):
         return None, return_code
-
     return selected, return_code
 
 
 def parse_selected_items(items: tuple[Any], selected: str) -> list[Any]:
-    selected_clean = tuple(item for item in selected.split("\n") if item)
+    selected_clean = [item for item in selected.split("\n") if item]
     input_items = "\n".join(map(str, items))
     items_str = input_items.split("\n")
-
     result = []
     try:
         for selection in selected_clean:
             idx = items_str.index(selection)
             result.append(items[idx])
     except ValueError as err:
-        log.error(err)
+        log.warning(err)
+        result = selected_clean
     return result

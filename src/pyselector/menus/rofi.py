@@ -9,6 +9,7 @@ from typing import Any
 
 from pyselector import constants
 from pyselector import helpers
+from pyselector.interfaces import UserCancelSelection
 from pyselector.key_manager import KeyManager
 
 if TYPE_CHECKING:
@@ -163,7 +164,7 @@ class Rofi:
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
         selected, code = helpers._execute(args, items)
 
-        if not selected:
+        if not selected or code == UserCancelSelection(1):
             return None, code
 
         result = helpers.parse_selected_items(items, selected)
