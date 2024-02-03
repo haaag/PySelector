@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 class Dmenu:
     def __init__(self) -> None:
-        self.name = "dmenu"
+        self.name = 'dmenu'
         self.url = constants.HOMEPAGE_DMENU
         self.keybind = KeyManager()
 
@@ -35,27 +35,27 @@ class Dmenu:
     ) -> list[str]:
         args = shlex.split(self.command)
 
-        if kwargs.get("lines"):
-            args.extend(["-l", str(kwargs.pop("lines"))])
+        if kwargs.get('lines'):
+            args.extend(['-l', str(kwargs.pop('lines'))])
 
         if prompt:
-            args.extend(["-p", prompt])
+            args.extend(['-p', prompt])
 
-        if kwargs.get("bottom"):
-            kwargs.pop("bottom")
-            args.append("-b")
+        if kwargs.get('bottom'):
+            kwargs.pop('bottom')
+            args.append('-b')
 
         if not case_sensitive:
-            args.append("-i")
+            args.append('-i')
 
-        if kwargs.get("font"):
-            args.extend(["-fn", kwargs.pop("font")])
+        if kwargs.get('font'):
+            args.extend(['-fn', kwargs.pop('font')])
 
         if multi_select:
-            log.debug("not supported in dmenu: %s", "multi-select")
+            log.debug('not supported in dmenu: %s', 'multi-select')
 
         for key in self.keybind.registered_keys:
-            log.debug("key=%s not supported in dmenu", key)
+            log.debug('key=%s not supported in dmenu', key)
 
         if kwargs:
             for arg, value in kwargs.items():
@@ -67,7 +67,7 @@ class Dmenu:
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
-        prompt: str = "PySelector> ",
+        prompt: str = 'PySelector> ',
         **kwargs,
     ) -> PromptReturn:
         """Prompts the user with a rofi window containing the given items

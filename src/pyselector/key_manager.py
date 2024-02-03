@@ -33,17 +33,17 @@ class Keybind:
         toggle_hidden(): Toggles the visibility of the keybind in the user interface.
     """
 
-    id: int  # noqa: A003
+    id: int
     bind: str
     code: int
     description: str
-    action: str | None = ""
+    action: str | None = ''
     hidden: bool = True
     callback: Callable[..., Any] | None = None
 
     def toggle_hidden(self) -> None:
         """Toggles the visibility of the keybind in the user interface."""
-        log.debug("Toggling keybind=%s %s", self.hidden, self.bind)
+        log.debug('Toggling keybind=%s %s', self.hidden, self.bind)
         self.hidden = not self.hidden
 
     def show(self) -> None:
@@ -54,6 +54,9 @@ class Keybind:
 
     def __hash__(self):
         return hash((self.code, self.description))
+
+    def __str__(self) -> str:
+        return f"{self.bind:<10}: {self.description} ({'Hidden' if self.hidden else 'Visible'})"
 
 
 class KeyManager:
@@ -109,7 +112,7 @@ class KeyManager:
     def unregister(self, code: int) -> Keybind:
         """Removes the keybind with the specified bind."""
         if not self.keys.get(code):
-            err_msg = f"No keybind found with {code=}"
+            err_msg = f'No keybind found with {code=}'
             log.error(err_msg)
             raise KeybindError(err_msg)
         return self.keys.pop(code)
@@ -119,6 +122,10 @@ class KeyManager:
         keys = list(self.keys.values())
         self.keys.clear()
         return keys
+
+    def disable_all(self) -> None:
+        """Disables all keybinds."""
+        self.keys = {}
 
     def register(self, key: Keybind, exist_ok: bool = False) -> Keybind:
         """
@@ -136,8 +143,8 @@ class KeyManager:
             self.unregister(key.code)
 
         if self.keys.get(key.code):
-            log.error("%s already registered", key.bind)
-            msg = f"{key.bind=} already registered"
+            log.error('%s already registered', key.bind)
+            msg = f'{key.bind=} already registered'
             raise KeybindError(msg)
 
         self.key_count += 1
@@ -180,7 +187,7 @@ class KeyManager:
         try:
             return self.keys[code]
         except KeyError:
-            msg = f"No keybind found with {code=}"
+            msg = f'No keybind found with {code=}'
             raise KeybindError(msg) from None
 
     def get_keybind_by_bind(self, bind: str) -> Keybind:
@@ -193,5 +200,5 @@ class KeyManager:
         for key in self.registered_keys:
             if key.bind == bind:
                 return key
-        msg = f"No keybind found with {bind=}"
+        msg = f'No keybind found with {bind=}'
         raise KeybindError(msg) from None

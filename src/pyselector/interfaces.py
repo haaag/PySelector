@@ -10,8 +10,8 @@ if TYPE_CHECKING:
     from pyselector.key_manager import KeyManager
 
 PromptReturn = tuple[Any, int]
-UserConfirmsSelection = NewType("UserConfirmsSelection", int)
-UserCancelSelection = NewType("UserCancelSelection", int)
+UserConfirmsSelection = NewType('UserConfirmsSelection', int)
+UserCancelSelection = NewType('UserCancelSelection', int)
 
 
 class ExecutableNotFoundError(Exception):
@@ -32,7 +32,7 @@ class MenuInterface(Protocol):
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool | None = None,
         multi_select: bool = False,
-        prompt: str = "PySelector> ",
+        prompt: str = 'PySelector> ',
         **kwargs,
     ) -> PromptReturn:
         ...

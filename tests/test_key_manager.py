@@ -15,12 +15,10 @@ def key_manager() -> KeyManager:
 
 @pytest.fixture
 def test_keybind() -> tuple[str, str, bool]:
-    return ("alt-n", "add record", False)
+    return ('alt-n', 'add record', False)
 
 
-def test_add_keybind(
-    key_manager: KeyManager, test_keybind: tuple[str, str, bool]
-) -> None:
+def test_add_keybind(key_manager: KeyManager, test_keybind: tuple[str, str, bool]) -> None:
     bind, description, hidden = test_keybind
     keybind = key_manager.add(bind, description, lambda: None, hidden=hidden)
     assert isinstance(keybind, Keybind)
@@ -29,9 +27,7 @@ def test_add_keybind(
     assert keybind.hidden == hidden
 
 
-def test_register_keybind(
-    key_manager: KeyManager, test_keybind: tuple[str, str, bool]
-) -> None:
+def test_register_keybind(key_manager: KeyManager, test_keybind: tuple[str, str, bool]) -> None:
     bind, description, hidden = test_keybind
     keybind = Keybind(
         id=1,
@@ -45,9 +41,7 @@ def test_register_keybind(
     assert registered_keybind == keybind
 
 
-def test_register_and_replace_keybind(
-    key_manager: KeyManager, test_keybind: tuple[str, str, bool]
-) -> None:
+def test_register_and_replace_keybind(key_manager: KeyManager, test_keybind: tuple[str, str, bool]) -> None:
     bind, description, hidden = test_keybind
     keybind = Keybind(
         id=1,
@@ -61,9 +55,7 @@ def test_register_and_replace_keybind(
     key_manager.register(keybind, exist_ok=True)
 
 
-def test_register_existing_keybind(
-    key_manager: KeyManager, test_keybind: tuple[str, str, bool]
-) -> None:
+def test_register_existing_keybind(key_manager: KeyManager, test_keybind: tuple[str, str, bool]) -> None:
     bind, description, hidden = test_keybind
     keybind = Keybind(
         id=1,
@@ -78,9 +70,7 @@ def test_register_existing_keybind(
         key_manager.register(keybind)
 
 
-def test_unregister_keybind(
-    key_manager: KeyManager, test_keybind: tuple[str, str, bool]
-) -> None:
+def test_unregister_keybind(key_manager: KeyManager, test_keybind: tuple[str, str, bool]) -> None:
     bind, description, hidden = test_keybind
     keybind = Keybind(
         id=1,
@@ -97,23 +87,23 @@ def test_unregister_keybind(
 
 def test_unregister_keybind_error(key_manager: KeyManager) -> None:
     with pytest.raises(KeybindError):
-        key_manager.unregister("CTRL+XX")
+        key_manager.unregister('CTRL+XX')
 
 
 def test_toggle_all_keybinds(key_manager: KeyManager) -> None:
-    key_manager.add("CTRL+S", "Save file", lambda: None)
-    key_manager.add("CTRL+Z", "Undo last action", lambda: None)
-    key_manager.add("CTRL+X", "Cut selected text", lambda: None)
+    key_manager.add('CTRL+S', 'Save file', lambda: None)
+    key_manager.add('CTRL+Z', 'Undo last action', lambda: None)
+    key_manager.add('CTRL+X', 'Cut selected text', lambda: None)
     key_manager.toggle_all()
     for keybind in key_manager.all_registered:
         assert keybind.hidden
 
 
 def test_toggle_hidden_keybinds(key_manager: KeyManager) -> None:
-    key_manager.add("CTRL+S", "Save file", lambda: None, hidden=False)
-    key_manager.add("CTRL+Z", "Undo last action", lambda: None, hidden=False)
-    key_manager.add("CTRL+X", "Cut selected text", lambda: None, hidden=False)
-    key_manager.add("CTRL+P", "Ignore", lambda: None, hidden=True)
+    key_manager.add('CTRL+S', 'Save file', lambda: None, hidden=False)
+    key_manager.add('CTRL+Z', 'Undo last action', lambda: None, hidden=False)
+    key_manager.add('CTRL+X', 'Cut selected text', lambda: None, hidden=False)
+    key_manager.add('CTRL+P', 'Ignore', lambda: None, hidden=True)
 
     key_manager.toggle_hidden()
     assert len(key_manager.temp_hidden) == 3

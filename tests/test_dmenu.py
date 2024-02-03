@@ -11,16 +11,16 @@ def test_build_command(dmenu) -> None:
     args = dmenu._build_command(
         case_sensitive=True,
         multi_select=False,
-        prompt="Test>",
+        prompt='Test>',
         lines=10,
-        font="sans",
+        font='sans',
         bottom=True,
     )
-    assert "-i" in args
-    assert "-p" in args
-    assert "-l" in args
-    assert "-fn" in args
-    assert "-b" in args
+    assert '-i' in args
+    assert '-p' in args
+    assert '-l' in args
+    assert '-fn' in args
+    assert '-b' in args
 
 
 # def test_build_command_warning(dmenu) -> None:
@@ -41,4 +41,4 @@ def test_build_command(dmenu) -> None:
 
 
 def test_prompt_items_empty(dmenu) -> None:
-    dmenu.prompt(prompt="PressEnter>")
+    dmenu.prompt(prompt='PressEnter>')

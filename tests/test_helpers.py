@@ -15,25 +15,25 @@ class Case(NamedTuple):
 
 
 def test_check_command_success() -> None:
-    case = Case(input="cat", expected="/bin/cat")
+    case = Case(input='cat', expected='/bin/cat')
     command = helpers.check_command(
         name=case.input,
-        reference="...",
+        reference='...',
     )
     assert command == case.expected
 
 
 def test_check_command_failure() -> None:
-    case = Case(input="i_dont_exists", expected=ExecutableNotFoundError)
+    case = Case(input='i_dont_exists', expected=ExecutableNotFoundError)
     with pytest.raises(case.expected):
         helpers.check_command(name=case.input, reference=case.input)
 
 
 @pytest.mark.parametrize(
-    "input",
+    'input',
     (
-        b"Testing line",
-        b"Another line",
+        b'Testing line',
+        b'Another line',
     ),
 )
 def test_parse_single_bytes_line(input) -> None:
@@ -43,11 +43,11 @@ def test_parse_single_bytes_line(input) -> None:
 
 
 @pytest.mark.parametrize(
-    ("input", "expected"),
+    ('input', 'expected'),
     (
-        Case(input=b"Testing", expected=1),
-        Case(input=b"Testing\nLines\nAnother", expected=3),
-        Case(input=b"Testing\nFour\nLines\nAnother", expected=4),
+        Case(input=b'Testing', expected=1),
+        Case(input=b'Testing\nLines\nAnother', expected=3),
+        Case(input=b'Testing\nFour\nLines\nAnother', expected=4),
     ),
 )
 def test_parse_mutitple_bytes_lines(input, expected) -> None:

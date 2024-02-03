@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 ROFI_RETURN_CODE_START = 10
-BULLET = "\u2022"
+BULLET = '\u2022'
 
 
 class Rofi:
@@ -38,10 +38,9 @@ class Rofi:
     """
 
     def __init__(self) -> None:
-        self.name = "rofi"
+        self.name = 'rofi'
         self.url = constants.HOMEPAGE_ROFI
         self.keybind = KeyManager()
-
         self.keybind.code_count = ROFI_RETURN_CODE_START
 
     @property
@@ -61,66 +60,65 @@ class Rofi:
         args = []
 
         args.extend(shlex.split(self.command))
-        args.append("-dmenu")
-        args.append("-sync")
+        args.append('-dmenu')
+        args.append('-sync')
 
-        if kwargs.get("theme"):
-            args.extend(["-theme", kwargs.pop("theme")])
+        if kwargs.get('theme'):
+            args.extend(['-theme', kwargs.pop('theme')])
 
-        if kwargs.get("lines"):
-            args.extend(["-l", str(kwargs.pop("lines"))])
+        if kwargs.get('lines'):
+            args.extend(['-l', str(kwargs.pop('lines'))])
 
         if prompt:
-            args.extend(["-p", prompt])
+            args.extend(['-p', prompt])
 
-        if kwargs.get("markup"):
-            del kwargs["markup"]
-            args.append("-markup-rows")
+        if kwargs.get('markup'):
+            del kwargs['markup']
+            args.append('-markup-rows')
 
-        if kwargs.get("mesg"):
+        if kwargs.get('mesg'):
             messages.extend(shlex.split(f"'{kwargs.pop('mesg')}'"))
 
-        if kwargs.get("filter"):
-            args.extend(["-filter", kwargs.pop("filter")])
+        if kwargs.get('filter'):
+            args.extend(['-filter', kwargs.pop('filter')])
 
-        if kwargs.get("location"):
-            direction = kwargs.pop("location")
-            args.extend(["-location", self.location(direction)])
+        if kwargs.get('location'):
+            direction = kwargs.pop('location')
+            args.extend(['-location', self.location(direction)])
 
-        if kwargs.get("width"):
+        if kwargs.get('width'):
             dimensions_args.append(f"width: {kwargs.pop('width')};")
 
-        if kwargs.get("height"):
+        if kwargs.get('height'):
             dimensions_args.append(f"height: {kwargs.pop('height')};")
 
         if case_sensitive:
-            args.append("-case-sensitive")
+            args.append('-case-sensitive')
         else:
-            args.append("-i")
+            args.append('-i')
 
         if multi_select:
-            args.append("-multi-select")
+            args.append('-multi-select')
 
         if dimensions_args:
-            formatted_string = " ".join(dimensions_args)
+            formatted_string = ' '.join(dimensions_args)
             args.extend(shlex.split("-theme-str 'window {" + formatted_string + "}'"))
 
         for key in self.keybind.registered_keys:
-            args.extend(shlex.split(f"-kb-custom-{key.id} {key.bind}"))
+            args.extend(shlex.split(f'-kb-custom-{key.id} {key.bind}'))
             if not key.hidden:
-                messages.append(f"{BULLET} Use <{key.bind}> {key.description}")
+                messages.append(f'{BULLET} Use <{key.bind}> {key.description}')
 
         if messages:
-            mesg = "\n".join(messages)
+            mesg = '\n'.join(messages)
             args.extend(shlex.split(f"-mesg '{mesg}'"))
 
         if kwargs:
             for arg, value in kwargs.items():
                 log.debug("'%s=%s' not supported", arg, value)
 
-        title_markup = "true" if kwargs.pop("title_markup", False) else "false"
+        title_markup = 'true' if kwargs.pop('title_markup', False) else 'false'
         args.extend(shlex.split(f"-theme-str 'textbox {{ markup: {title_markup};}}'"))
-
         return args
 
     def prompt(
@@ -128,7 +126,7 @@ class Rofi:
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
-        prompt: str = "PySelector> ",
+        prompt: str = 'PySelector> ',
         **kwargs,
     ) -> PromptReturn:
         """Prompts the user with a rofi window containing the given items
@@ -151,7 +149,8 @@ class Rofi:
             theme    (str): The path of the rofi theme to use.
 
         Returns:
-            A tuple containing the selected item (str or list of str if `multi_select` enabled) and the return code (int).
+            A tuple containing the selected item (str or list of str if `multi_select` enabled)
+            and the return code (int).
 
         Return Code Value
             0: Row has been selected accepted by user.
@@ -176,7 +175,7 @@ class Rofi:
         return result, code
 
     @staticmethod
-    def location(direction: str = "center") -> str:
+    def location(direction: str = 'center') -> str:
         """
         Specify where the window should be located. The numbers map to the
         following locations on screen:
@@ -189,18 +188,18 @@ class Rofi:
         """
         try:
             location = {
-                "upper-left": 1,
-                "left": 8,
-                "bottom-left": 7,
-                "upper-center": 2,
-                "center": 0,
-                "bottom-center": 6,
-                "upper-right": 3,
-                "right": 4,
-                "bottom-right": 5,
+                'upper-left': 1,
+                'left': 8,
+                'bottom-left': 7,
+                'upper-center': 2,
+                'center': 0,
+                'bottom-center': 6,
+                'upper-right': 3,
+                'right': 4,
+                'bottom-right': 5,
             }
             return str(location[direction])
         except KeyError as e:
-            msg = "location %s not found.\nchosse from %s"
+            msg = 'location %s not found.\nchosse from %s'
             raise KeyError(msg, e, list(location.keys())) from e
             sys.exit(1)
