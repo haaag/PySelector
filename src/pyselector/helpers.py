@@ -6,6 +6,7 @@ import logging
 import shutil
 import subprocess
 from typing import Any
+from typing import Callable
 from typing import Iterable
 from typing import Sequence
 
@@ -23,15 +24,6 @@ def check_command(name: str, reference: str) -> str:
     return command
 
 
-def parse_bytes_line(b: bytes) -> str:
-    return ' '.join(b.decode(encoding='utf-8').split())
-
-
-def parse_multiple_bytes_lines(b: bytes) -> list[str]:
-    multi = b.decode(encoding='utf-8').splitlines()
-    return [' '.join(line.split()) for line in multi]
-
-
 def check_type(items: Iterable[Any]) -> None:
     if not isinstance(items, (tuple, list)):
         msg = 'items must be a tuple or list'
@@ -44,13 +36,15 @@ def check_type(items: Iterable[Any]) -> None:
         raise ValueError(msg)
 
 
-def _execute(args: list[str], items: list[Any] | tuple[Any]) -> tuple[str | None, int]:
-    # TODO: Add callback to process `items`
-    # Example:
-    # lambda item: f'{item.id} - {item.body}'
+def _execute(
+    args: list[str],
+    items: list[Any] | tuple[Any],
+    preprocessor: Callable[..., Any] | None = None,
+) -> tuple[str | None, int]:
     logger.debug('executing: %s', args)
-    # FIX: Something wrong with the types
     check_type(items)
+
+    preprocessor = preprocessor or str
 
     with subprocess.Popen(
         args,  # noqa: S603
@@ -58,7 +52,7 @@ def _execute(args: list[str], items: list[Any] | tuple[Any]) -> tuple[str | None
         stdin=subprocess.PIPE,
         text=True,
     ) as proc:
-        input_items = '\n'.join(map(str, items))
+        input_items = '\n'.join(map(preprocessor, items))
         selected, _ = proc.communicate(input=input_items)
         return_code = proc.wait()
 
@@ -67,18 +61,3 @@ def _execute(args: list[str], items: list[Any] | tuple[Any]) -> tuple[str | None
     if return_code == UserCancelSelection(1):
         return selected, return_code
     return selected, return_code
-
-
-def parse_selected_items(items: tuple[Any], selected: str) -> list[Any]:
-    selected_clean = [item for item in selected.split('\n') if item]
-    input_items = '\n'.join(map(str, items))
-    items_str = input_items.split('\n')
-    result = []
-    try:
-        for selection in selected_clean:
-            idx = items_str.index(selection)
-            result.append(items[idx])
-    except ValueError as err:
-        logger.warning(f'{err}. Returning items={selected_clean}')
-        result = selected_clean
-    return result

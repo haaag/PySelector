@@ -1,6 +1,8 @@
 # test_helpers.py
 
 import shutil
+from typing import Any
+from typing import Iterable
 from typing import NamedTuple
 from typing import Type
 from typing import Union
@@ -11,8 +13,8 @@ from pyselector.interfaces import ExecutableNotFoundError
 
 
 class Case(NamedTuple):
-    input: Union[str, bytes]
-    expected: Union[str, int, Type[ExecutableNotFoundError]]
+    input: Union[str, Iterable[Any]]
+    expected: Union[str, int, Type[ExecutableNotFoundError], None]
 
 
 def test_check_command_success() -> None:
@@ -37,27 +39,22 @@ def test_check_command_failure() -> None:
 
 
 @pytest.mark.parametrize(
-    'input',
-    (
-        b'Testing line',
-        b'Another line',
-    ),
+    'input, expected',
+    [
+        Case(
+            input='not a iterable',
+            expected=ValueError,
+        ),
+        Case(
+            input=[],
+            expected=None,
+        ),
+    ],
 )
-def test_parse_single_bytes_line(input) -> None:
-    line = helpers.parse_bytes_line(input)
-    assert isinstance(input, bytes)
-    assert isinstance(line, str)
+def test_check_type(input, expected):
+    if expected is None:
+        assert helpers.check_type(input) is None
+        return
 
-
-@pytest.mark.parametrize(
-    ('input', 'expected'),
-    (
-        Case(input=b'Testing', expected=1),
-        Case(input=b'Testing\nLines\nAnother', expected=3),
-        Case(input=b'Testing\nFour\nLines\nAnother', expected=4),
-    ),
-)
-def test_parse_mutitple_bytes_lines(input, expected) -> None:
-    lines = helpers.parse_multiple_bytes_lines(input)
-    assert isinstance(lines, list)
-    assert len(lines) == expected
+    with pytest.raises(expected):
+        helpers.check_type(input)
