@@ -5,8 +5,10 @@ import logging
 import shlex
 from typing import TYPE_CHECKING
 from typing import Any
+from typing import Callable
 
 from pyselector import constants
+from pyselector import extract
 from pyselector import helpers
 from pyselector.key_manager import KeyManager
 
@@ -42,14 +44,13 @@ class Fzf:
         if kwargs.get('mesg'):
             header.extend(shlex.split(f"'{kwargs.pop('mesg')}'"))
 
-        if kwargs.get('cycle'):
-            kwargs.pop('cycle')
+        if kwargs.pop('cycle', False):
             args.append('--cycle')
 
         if not kwargs.pop('preview', None):
             args.append('--no-preview')
 
-        if kwargs.get('height'):
+        if 'height' in kwargs:
             args.extend(shlex.split(f"--height {kwargs.pop('height')}"))
 
         if prompt:
@@ -60,19 +61,18 @@ class Fzf:
 
         # FIX: rethink keybinds for FZF
         # log.warning("keybinds are disabled")
-        for key in self.keybind.registered_keys:
-            log.debug('key=%s not supported in fzf', key)
-            # args.extend(shlex.split(f"--bind='{key.bind}:{key.action}'"))
-            # if not key.hidden:
-            #     header.append(f"Use {key.bind} {key.description}")
+        if self.keybind.registered_keys:
+            log.debug('Keybinds are disabled')
 
-        if kwargs:
-            for arg, value in kwargs.items():
-                log.debug("'%s=%s' not supported", arg, value)
+        for arg, value in kwargs.items():
+            log.debug("'%s=%s' not supported", arg, value)
 
         if header:
             mesg = '\n'.join(msg.replace('\n', ' ') for msg in header)
             args.extend(shlex.split(f"--header '{mesg}'"))
+
+        if 'print_query' in kwargs:
+            args.append('--print-query')
 
         return args
 
@@ -81,7 +81,8 @@ class Fzf:
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool | None = None,
         multi_select: bool = False,
-        prompt: str = 'PySelector> ',
+        prompt: str = constants.PROMPT,
+        preprocessor: Callable[..., Any] | None = None,
         **kwargs,
     ) -> PromptReturn:
         """
@@ -97,7 +98,7 @@ class Fzf:
             items = []
 
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
-        selected, code = helpers._execute(args, items)
+        selected, code = helpers._execute(args, items, preprocessor)
 
         if code == fzf_interrupted_code:
             return None, 1
@@ -105,8 +106,15 @@ class Fzf:
         if not selected:
             return selected, code
 
-        result = helpers.parse_selected_items(items, selected)
+        selected = selected.strip()
+
+        if multi_select:
+            result = extract.items(items, selected, preprocessor)
+        else:
+            result = extract.item(items, selected, preprocessor)
 
         if not result:
-            return None, 1
-        return result[0], code
+            log.warning('result is empty')
+            return selected, 1
+
+        return result, code

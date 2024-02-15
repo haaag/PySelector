@@ -6,8 +6,10 @@ import shlex
 import sys
 from typing import TYPE_CHECKING
 from typing import Any
+from typing import Callable
 
 from pyselector import constants
+from pyselector import extract
 from pyselector import helpers
 from pyselector.interfaces import UserCancelSelection
 from pyselector.key_manager import KeyManager
@@ -126,7 +128,8 @@ class Rofi:
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
-        prompt: str = 'PySelector> ',
+        prompt: str = constants.PROMPT,
+        preprocessor: Callable[..., Any] | None = None,
         **kwargs,
     ) -> PromptReturn:
         """Prompts the user with a rofi window containing the given items
@@ -161,17 +164,22 @@ class Rofi:
             items = []
 
         args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
-        selected, code = helpers._execute(args, items)
+        selected, code = helpers._execute(args, items, preprocessor)
 
         if not selected or code == UserCancelSelection(1):
             return None, code
 
-        result = helpers.parse_selected_items(items, selected)
+        selected = selected.strip()
+
+        if multi_select:
+            result = extract.items(items, selected, preprocessor)
+        else:
+            result = extract.item(items, selected, preprocessor)
 
         if not result:
-            return None, 1
-        if not multi_select:
-            return result[0], code
+            log.warning('result is empty')
+            return selected, 1
+
         return result, code
 
     @staticmethod

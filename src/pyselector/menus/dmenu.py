@@ -5,8 +5,10 @@ import logging
 import shlex
 from typing import TYPE_CHECKING
 from typing import Any
+from typing import Callable
 
 from pyselector import constants
+from pyselector import extract
 from pyselector import helpers
 from pyselector.key_manager import KeyManager
 
@@ -67,7 +69,8 @@ class Dmenu:
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
-        prompt: str = 'PySelector> ',
+        prompt: str = constants.PROMPT,
+        preprocessor: Callable[..., Any] | None = None,
         **kwargs,
     ) -> PromptReturn:
         """Prompts the user with a rofi window containing the given items
@@ -98,8 +101,12 @@ class Dmenu:
         if not selected:
             return None, code
 
-        result = helpers.parse_selected_items(items, selected)
+        selected = selected.strip()
+
+        result = extract.item(items, selected, preprocessor)
 
         if not result:
-            return None, 1
-        return result[0], code
+            log.warning('result is empty')
+            return selected, 1
+
+        return result, code
