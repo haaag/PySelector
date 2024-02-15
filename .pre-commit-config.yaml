@@ -24,7 +24,7 @@ repos:
 
   # Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.2.0
+    rev: v0.2.1
     hooks:
       - id: ruff
 
@@ -48,7 +48,7 @@ repos:
 
   # Spell
   - repo: https://github.com/crate-ci/typos
-    rev: v1.18.0
+    rev: typos-v0.10.21
     hooks:
       - id: typos
   - repo: https://github.com/codespell-project/codespell

@@ -19,17 +19,14 @@ Source = "https://github.com/haaag/pyselector"
 
 [project.optional-dependencies]
 dev = ["mypy==1.0.1", "ruff==0.0.257"]
-docs = [
-  "mkdocs<2.0.0,>=1.1.2",
-  "mkdocs-material<9.0.0,>=8.1.4",
-  "mkdocstrings==0.20",
-  "mkdocstrings-python==0.8.3",
-]
 test = ["coverage[toml]<8.0,>=6.5", "pytest<8.0.0,>=7.1.3"]
+
 [tool.hatch.version]
 path = "src/pyselector/__init__.py"
 
 [tool.hatch.envs.default.scripts]
+test = "pytest -v -ra -q --ignore=tests/test_fzf.py --ignore=tests/test_dmenu.py --ignore=tests/test_rofi.py"
+test-gui = "pytest -v -ra -q tests/test_dmenu.py tests/test_rofi.py"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=pyselector --cov=tests {args} && coverage html"
 cov-html = "coverage html"
 no-cov = "cov --no-cov {args}"
@@ -37,6 +34,7 @@ no-cov = "cov --no-cov {args}"
 [tool.pytest.ini_options]
 pythonpath = "src"
 testpaths = ["tests"]
+addopts = ["--ignore=tests/test_fzf.py"]
 
 [tool.coverage.run]
 omit = ["src/pyselector/interfaces.py"]
@@ -54,7 +52,6 @@ exclude = ["tests", "example.py"]
 [tool.ruff]
 fix = false
 line-length = 120
-# output-format = "full"
 show-fixes = true
 target-version = "py37"
 exclude = [".venv", ".mypy_cache", ".pytest_cache"]
@@ -127,11 +124,12 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/**/*" = [
-  "ARG002", # unused-method-argument
-  "Q000",   # single-quote preferred
-  "FBT001", # boolean-type-hint-positional-argument
-  "FBT002", # boolean-default-value-positional-argument
-  "A003",   # builtin-attribute-shadowing
+  "ARG002",  # unused-method-argument
+  "Q000",    # single-quote preferred
+  "FBT001",  # boolean-type-hint-positional-argument
+  "FBT002",  # boolean-default-value-positional-argument
+  "A003",    # builtin-attribute-shadowing
+  "PLR0913",
 ]
 "tests/**/*" = [
   "S101",    # use of `assert` detected
