@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 from typing import Any
+from typing import Callable
 from typing import NewType
 from typing import Protocol
 
@@ -33,6 +34,7 @@ class MenuInterface(Protocol):
         case_sensitive: bool | None = None,
         multi_select: bool = False,
         prompt: str = 'PySelector> ',
+        preprocessor: Callable[..., Any] | None = None,
         **kwargs,
     ) -> PromptReturn:
         ...

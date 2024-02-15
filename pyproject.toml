@@ -27,6 +27,7 @@ path = "src/pyselector/__init__.py"
 [tool.hatch.envs.default.scripts]
 test = "pytest -v -ra -q --ignore=tests/test_fzf.py --ignore=tests/test_dmenu.py --ignore=tests/test_rofi.py"
 test-gui = "pytest -v -ra -q tests/test_dmenu.py tests/test_rofi.py"
+test-fzf = "pytest -v -ra -q tests/test_fzf.py"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=pyselector --cov=tests {args} && coverage html"
 cov-html = "coverage html"
 no-cov = "cov --no-cov {args}"

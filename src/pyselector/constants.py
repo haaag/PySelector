@@ -7,3 +7,6 @@ HOMEPAGE_FZF = 'https://github.com/junegunn/fzf'
 
 # icons
 BULLET = '\u2022'
+
+# others
+PROMPT = 'PySelector> '

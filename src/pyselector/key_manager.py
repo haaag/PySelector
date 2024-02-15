@@ -77,7 +77,7 @@ class KeyManager:
         self.code_count = 1
         self.original_states: list[Keybind] = []
 
-    def add(  # noqa: PLR0913
+    def add(
         self,
         key: str,
         description: str,
@@ -97,6 +97,7 @@ class KeyManager:
             hidden      (bool): Whether the keybind should be hidden from the user interface. Defaults to False.
             exist_ok    (bool): Whether to overwrite an existing keybind with the same bind. Defaults to False.
         """
+
         return self.register(
             Keybind(
                 id=self.key_count,
@@ -168,14 +169,21 @@ class KeyManager:
         temporarily stores the original "hidden" state of each keybind.
         If `restore` is True, restores the original "hidden" state of each keybind.
         """
+        # for key in self.registered_keys:
+        #     key.hidden = not key.hidden
+        #     self.original_states.append(key)
         for key in self.registered_keys:
             if not key.hidden:
                 key.toggle_hidden()
                 self.original_states.append(key)
         if restore:
             for key in self.original_states:
-                key.toggle_hidden()
+                key.hidden = not key.hidden
             self.original_states = []
+
+    def hidden_keys(self) -> list[Keybind]:
+        """Returns a list of all hidden keybinds."""
+        return [key for key in self.registered_keys if key.hidden]
 
     def get_keybind_by_code(self, code: int) -> Keybind:
         """
