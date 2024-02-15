@@ -1,5 +1,6 @@
 # test_helpers.py
 
+import shutil
 from typing import NamedTuple
 from typing import Type
 from typing import Union
@@ -15,7 +16,13 @@ class Case(NamedTuple):
 
 
 def test_check_command_success() -> None:
-    case = Case(input='cat', expected='/bin/cat')
+    cat = 'cat'
+    cmd = shutil.which(cat)
+
+    if not cmd:
+        cmd = '/usr/bin/cat'
+
+    case = Case(input=cat, expected=cmd)
     command = helpers.check_command(
         name=case.input,
         reference='...',

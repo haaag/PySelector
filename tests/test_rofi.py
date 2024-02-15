@@ -55,18 +55,6 @@ def test_build_command(rofi) -> None:
     assert '-theme-str' in args
 
 
-# def test_build_command_warning(rofi) -> None:
-#     with pytest.warns(UserWarning):
-#         rofi._build_command(
-#             case_sensitive=True,
-#             multi_select=True,
-#             prompt="test>",
-#             lines=5,
-#             theme="default",
-#             invalid_arg=True,
-#         )
-
-
 def test_build_command_not_case_sensitive(rofi: Rofi) -> None:
     args = rofi._build_command(
         case_sensitive=False,
@@ -76,17 +64,18 @@ def test_build_command_not_case_sensitive(rofi: Rofi) -> None:
     assert '-i' in args
 
 
-def test_system_exit(rofi: Rofi, items) -> None:
+def test_return_nonzero(rofi: Rofi, items) -> None:
     """Test case user hits escape raises SystemExit"""
-    with pytest.raises(SystemExit):
-        lines, _ = rofi.prompt(items=items, prompt='PressEscape>', mesg='> Hit <Escape>')
+    lines, code = rofi.prompt(items=items, prompt='Hit <Escape>', mesg='> Hit <Escape>')
+
+    assert code != 0
 
 
 def test_multi_lines_selected(rofi, items) -> None:
     """Test case where multi_select is True"""
     lines, _ = rofi.prompt(
         items=items,
-        prompt='Shift+Enter>',
+        prompt='Select all items with <Shift+Enter>',
         multi_select=True,
         mesg='> Select all items with <Shift+Enter>',
     )
@@ -98,18 +87,18 @@ def test_case_sensitive(rofi) -> None:
     """Test case where case_sensitive is True"""
     result, _ = rofi.prompt(
         items=['OPTION 1'],
-        prompt='CaseSensitive>',
+        prompt='Type option with CAPS on>',
         case_sensitive=True,
-        mesg='> Type some option with CAPS on',
+        mesg='> Type option with CAPS on',
     )
     assert result == 'OPTION 1'
 
 
 def test_int_items_to_str(rofi) -> None:
     items = [1, 2, 3]
-    result, _ = rofi.prompt(items=items, prompt='Select>', mesg='> Select first item')
-    assert isinstance(result, str)
-    assert result == '1'
+    result, _ = rofi.prompt(items=items, prompt='Select first item>', mesg='> Select first item')
+    assert isinstance(result, int)
+    assert result == 1
 
 
 @pytest.mark.parametrize(

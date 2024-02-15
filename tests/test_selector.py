@@ -11,12 +11,15 @@ def menu() -> Menu:
 
 
 def test_get_rofi(menu) -> None:
-    assert isinstance(menu.rofi(), Rofi)
+    rofi = menu.get('rofi')
+    assert isinstance(rofi, Rofi)
 
 
 def test_get_dmenu(menu) -> None:
-    assert isinstance(menu.dmenu(), Dmenu)
+    dmenu = menu.get('dmenu')
+    assert isinstance(dmenu, Dmenu)
 
 
 def test_get_fzf(menu) -> None:
-    assert isinstance(menu.fzf(), Fzf)
+    fzf = menu.get('fzf')
+    assert isinstance(fzf, Fzf)

@@ -81,8 +81,8 @@ def test_unregister_keybind(key_manager: KeyManager, test_keybind: tuple[str, st
         callback=lambda: None,
     )
     key_manager.register(keybind)
-    key_manager.unregister(bind)
-    assert key_manager.all_registered == []
+    key_manager.unregister(keybind.code)
+    assert key_manager.registered_keys == []
 
 
 def test_unregister_keybind_error(key_manager: KeyManager) -> None:
@@ -95,22 +95,25 @@ def test_toggle_all_keybinds(key_manager: KeyManager) -> None:
     key_manager.add('CTRL+Z', 'Undo last action', lambda: None)
     key_manager.add('CTRL+X', 'Cut selected text', lambda: None)
     key_manager.toggle_all()
-    for keybind in key_manager.all_registered:
+    for keybind in key_manager.registered_keys:
         assert keybind.hidden
 
 
 def test_toggle_hidden_keybinds(key_manager: KeyManager) -> None:
-    key_manager.add('CTRL+S', 'Save file', lambda: None, hidden=False)
-    key_manager.add('CTRL+Z', 'Undo last action', lambda: None, hidden=False)
-    key_manager.add('CTRL+X', 'Cut selected text', lambda: None, hidden=False)
+    key_manager.add('CTRL+S', 'Save file', lambda: None)
+    key_manager.add('CTRL+X', 'Cut selected text', lambda: None)
+    key_manager.add('CTRL+Z', 'Undo last action', lambda: None, hidden=True)
     key_manager.add('CTRL+P', 'Ignore', lambda: None, hidden=True)
+    key_manager.add('CTRL+Y', 'Yank', lambda: None, hidden=True)
+
+    assert len(key_manager.hidden_keys()) == 3
 
     key_manager.toggle_hidden()
-    assert len(key_manager.temp_hidden) == 3
+    assert len(key_manager.hidden_keys()) == 5
 
-    for keybind in key_manager.temp_hidden:
+    for keybind in key_manager.hidden_keys():
         assert keybind.hidden
 
-    key_manager.toggle_hidden(restore=True)
-    for keybind in key_manager.temp_hidden:
-        assert not keybind.hidden
+    key_manager.toggle_hidden()
+    for keybind in key_manager.hidden_keys():
+        assert keybind.hidden

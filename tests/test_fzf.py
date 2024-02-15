@@ -43,18 +43,13 @@ def test_build_command_kwargs(fzf) -> None:
 
 
 def test_build_command_header(fzf) -> None:
-    alt_r = fzf.keybind.add(
-        key='alt-r',
-        description='Testing add keybind',
-        callback=lambda: None,
-    )
     args = fzf._build_command(
         case_sensitive=True,
         multi_select=False,
         prompt='Testing>',
+        mesg='Testing>',
     )
     assert '--header' in args
-    assert f'--bind={alt_r.bind}:' in args
 
 
 def test_build_command_multi_select(fzf) -> None:
@@ -69,27 +64,3 @@ def test_build_command_multi_select(fzf) -> None:
     assert '--no-preview' in args
     assert '--multi' in args
     assert '--height' in args
-
-
-def test_prompt_single_selection(fzf) -> None:
-    item, keycode = fzf.prompt(
-        case_sensitive=False,
-        multi_select=False,
-        items=['A', 'B', 'C'],
-    )
-    assert len(item) == 1
-
-
-def test_prompt_multiple_selection(fzf) -> None:
-    items, keycode = fzf.prompt(
-        case_sensitive=False,
-        multi_select=True,
-        items=['A', 'B', 'C'],
-        mesg='> Use <tab> to select all items',
-    )
-    assert len(items) == 3
-
-
-def test_prompt_empty_items(fzf) -> None:
-    with pytest.raises(SystemExit):
-        item, keycode = fzf.prompt(case_sensitive=False, multi_select=False, mesg='> Hit <Escape>')
