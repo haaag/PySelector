@@ -37,6 +37,8 @@ def item(
         logger.debug('items and selected are empty')
         return None
 
+    selected = selected.strip()
+
     try:
         items_str = get_items_strings(items, preprocessor)
         idx = items_str.index(selected)
@@ -59,7 +61,7 @@ def index(
         selected (str): A string containing selected items separated by newline characters.
 
     Returns:
-        int: Index of selected item
+        int: Index of selected item, if not found returns -1
     """
     if not selected and not items:
         return -1
@@ -89,7 +91,7 @@ def items(
     Returns:
         list[Any]: A list containing selected items from the input list.
     """
-    return parse_multiple_items(items, selected, preprocessor=preprocessor)
+    return parse_multiple_items(items, selected.strip(), preprocessor=preprocessor)
 
 
 def indices(
@@ -107,7 +109,7 @@ def indices(
     Returns:
         list[int]: A list containing their indices
     """
-    return parse_multiple_items(items, selected, index=True, preprocessor=preprocessor)
+    return parse_multiple_items(items, selected.strip(), index=True, preprocessor=preprocessor)
 
 
 def parse_multiple_items(

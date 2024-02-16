@@ -13,8 +13,8 @@ def test_check_command(fzf) -> None:
     assert 'fzf' in fzf.command
 
 
-def test_build_command_args(fzf) -> None:
-    args = fzf._build_command(
+def test_build_args(fzf) -> None:
+    args = fzf._build_args(
         case_sensitive=True,
         multi_select=True,
         prompt='Testing>',
@@ -24,8 +24,8 @@ def test_build_command_args(fzf) -> None:
     assert '--multi' in args
 
 
-def test_build_command_kwargs(fzf) -> None:
-    args = fzf._build_command(
+def test_build_args_kwargs(fzf) -> None:
+    args = fzf._build_args(
         case_sensitive=True,
         multi_select=False,
         prompt='Testing>',
@@ -42,8 +42,8 @@ def test_build_command_kwargs(fzf) -> None:
     assert '--height' in args
 
 
-def test_build_command_header(fzf) -> None:
-    args = fzf._build_command(
+def test_build_args_header(fzf) -> None:
+    args = fzf._build_args(
         case_sensitive=True,
         multi_select=False,
         prompt='Testing>',
@@ -52,8 +52,8 @@ def test_build_command_header(fzf) -> None:
     assert '--header' in args
 
 
-def test_build_command_multi_select(fzf) -> None:
-    args = fzf._build_command(
+def test_build_args_multi_select(fzf) -> None:
+    args = fzf._build_args(
         case_sensitive=True,
         multi_select=True,
         prompt='Testing>',

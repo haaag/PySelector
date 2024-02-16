@@ -28,7 +28,7 @@ class Fzf:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_command(  # noqa: C901
+    def _build_args(  # noqa: C901
         self,
         case_sensitive,
         multi_select,
@@ -59,7 +59,7 @@ class Fzf:
         if multi_select:
             args.append('--multi')
 
-        # FIX: rethink keybinds for FZF
+        # FIX: Do keybinds for FZF
         # log.warning("keybinds are disabled")
         if self.keybind.registered_keys:
             log.debug('Keybinds are disabled')
@@ -71,7 +71,7 @@ class Fzf:
             mesg = '\n'.join(msg.replace('\n', ' ') for msg in header)
             args.extend(shlex.split(f"--header '{mesg}'"))
 
-        if 'print_query' in kwargs:
+        if kwargs.pop('input', False):
             args.append('--print-query')
 
         return args
@@ -97,7 +97,7 @@ class Fzf:
         if not items:
             items = []
 
-        args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
+        args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
         selected, code = helpers._execute(args, items, preprocessor)
 
         if code == fzf_interrupted_code:
@@ -105,8 +105,6 @@ class Fzf:
 
         if not selected:
             return selected, code
-
-        selected = selected.strip()
 
         if multi_select:
             result = extract.items(items, selected, preprocessor)

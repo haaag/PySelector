@@ -28,7 +28,7 @@ class Dmenu:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_command(
+    def _build_args(
         self,
         case_sensitive,
         multi_select,
@@ -95,13 +95,11 @@ class Dmenu:
         if items is None:
             items = []
 
-        args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
+        args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
         selected, code = helpers._execute(args, items)
 
         if not selected:
             return None, code
-
-        selected = selected.strip()
 
         result = extract.item(items, selected, preprocessor)
 

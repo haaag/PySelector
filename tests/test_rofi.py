@@ -23,13 +23,13 @@ def items() -> list[str]:
     return ['Option 1', 'Option 2', 'Option 3']
 
 
-def test_build_command(rofi) -> None:
+def test_build_args(rofi) -> None:
     alt_r = rofi.keybind.add(
         key='alt-r',
         description='Testing add keybind',
         callback=lambda: None,
     )
-    args = rofi._build_command(
+    args = rofi._build_args(
         case_sensitive=True,
         multi_select=True,
         prompt='test>',
@@ -55,8 +55,8 @@ def test_build_command(rofi) -> None:
     assert '-theme-str' in args
 
 
-def test_build_command_not_case_sensitive(rofi: Rofi) -> None:
-    args = rofi._build_command(
+def test_build_args_not_case_sensitive(rofi: Rofi) -> None:
+    args = rofi._build_args(
         case_sensitive=False,
         multi_select=True,
         prompt='test>',

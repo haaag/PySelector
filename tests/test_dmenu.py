@@ -7,8 +7,8 @@ def dmenu() -> Dmenu:
     return Dmenu()
 
 
-def test_build_command(dmenu) -> None:
-    args = dmenu._build_command(
+def test_build_args(dmenu) -> None:
+    args = dmenu._build_args(
         case_sensitive=False,
         multi_select=False,
         prompt='Test>',
@@ -24,4 +24,4 @@ def test_build_command(dmenu) -> None:
 
 
 def test_prompt_items_empty(dmenu) -> None:
-    dmenu.prompt(prompt='PressEnter>')
+    dmenu.prompt(prompt='HitEnter>')

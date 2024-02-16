@@ -49,7 +49,7 @@ class Rofi:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_command(  # noqa: PLR0912, C901
+    def _build_args(  # noqa: PLR0912, C901
         # TODO: Break this function
         self,
         case_sensitive,
@@ -74,8 +74,7 @@ class Rofi:
         if prompt:
             args.extend(['-p', prompt])
 
-        if kwargs.get('markup'):
-            del kwargs['markup']
+        if kwargs.pop('markup', False):
             args.append('-markup-rows')
 
         if kwargs.get('mesg'):
@@ -163,13 +162,11 @@ class Rofi:
         if items is None:
             items = []
 
-        args = self._build_command(case_sensitive, multi_select, prompt, **kwargs)
+        args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
         selected, code = helpers._execute(args, items, preprocessor)
 
         if not selected or code == UserCancelSelection(1):
             return None, code
-
-        selected = selected.strip()
 
         if multi_select:
             result = extract.items(items, selected, preprocessor)
