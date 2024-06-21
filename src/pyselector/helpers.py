@@ -50,6 +50,7 @@ def _execute(
         args,  # noqa: S603
         stdout=subprocess.PIPE,
         stdin=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
         text=True,
     ) as proc:
         input_items = '\n'.join(map(preprocessor, items))
