@@ -49,14 +49,7 @@ class Rofi:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_args(  # noqa: PLR0912, C901
-        # TODO: Break this function
-        self,
-        case_sensitive,
-        multi_select,
-        prompt,
-        **kwargs,
-    ) -> list[str]:
+    def _build_args(self, case_sensitive, multi_select, prompt, **kwargs) -> list[str]:  # noqa: C901, PLR0912
         messages: list[str] = []
         dimensions_args: list[str] = []
         args = []
@@ -78,7 +71,7 @@ class Rofi:
             args.append('-markup-rows')
 
         if kwargs.get('mesg'):
-            messages.extend(shlex.split(f"'{kwargs.pop('mesg')}'"))
+            messages.extend(shlex.split(shlex.quote(kwargs.pop('mesg'))))
 
         if kwargs.get('filter'):
             args.extend(['-filter', kwargs.pop('filter')])
@@ -112,7 +105,7 @@ class Rofi:
 
         if messages:
             mesg = '\n'.join(messages)
-            args.extend(shlex.split(f"-mesg '{mesg}'"))
+            args.extend(shlex.split(f'-mesg {shlex.quote(mesg)}'))
 
         if kwargs:
             for arg, value in kwargs.items():
