@@ -42,7 +42,7 @@ class Fzf:
             args.append('+i' if case_sensitive else '-i')
 
         if kwargs.get('mesg'):
-            header.extend(shlex.split(f"'{kwargs.pop('mesg')}'"))
+            header.extend(shlex.split(shlex.quote(kwargs.pop('mesg'))))
 
         if kwargs.pop('cycle', False):
             args.append('--cycle')
@@ -51,7 +51,7 @@ class Fzf:
             args.append('--no-preview')
 
         if 'height' in kwargs:
-            args.extend(shlex.split(f"--height {kwargs.pop('height')}"))
+            args.extend(shlex.split(shlex.quote(f"--height={kwargs.pop('height')}")))
 
         if prompt:
             args.extend(['--prompt', prompt])
@@ -69,7 +69,7 @@ class Fzf:
 
         if header:
             mesg = '\n'.join(msg.replace('\n', ' ') for msg in header)
-            args.extend(shlex.split(f"--header '{mesg}'"))
+            args.extend(shlex.split(shlex.quote(f'--header={mesg}')))
 
         if kwargs.pop('input', False):
             args.append('--print-query')
