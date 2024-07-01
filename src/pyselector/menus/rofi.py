@@ -100,7 +100,7 @@ class Rofi:
             formatted_string = ' '.join(dimensions_args)
             args.extend(shlex.split("-theme-str 'window {" + formatted_string + "}'"))
 
-        for key in self.keybind.registered_keys:
+        for key in self.keybind.list_keys:
             args.extend(shlex.split(f'-kb-custom-{key.id} {key.bind}'))
             if not key.hidden:
                 messages.append(f'{constants.BULLET} Use <{key.bind}> {key.description}')
@@ -130,7 +130,7 @@ class Rofi:
            and returns the selected item and code.
 
         Args:
-            items (Iterable[str, int], optional):  The items to display in the rofi window
+            items (Sequence[str, int], optional):  The items to display in the rofi window
             case_sensitive (bool, optional):       Whether or not to perform a case-sensitive search
             multi_select (bool, optional):         Whether or not to allow the user to select multiple items
             prompt (str, optional):                The prompt to display in the rofi window

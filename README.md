@@ -30,3 +30,9 @@ pip install pyselector
 - [dmenu](https://tools.suckless.org/dmenu/)
 - [Rofi](https://github.com/davatorium/rofi)
 - [fzf](https://github.com/junegunn/fzf) _(WIP)_
+
+## 📓 TODO
+- [ ] Rename main functions in menus.
+- [ ] Add `select` function.
+- [ ] Add `input` function.
+- [ ] Add

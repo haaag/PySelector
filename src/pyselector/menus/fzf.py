@@ -61,7 +61,7 @@ class Fzf:
 
         # FIX: Do keybinds for FZF
         # log.warning("keybinds are disabled")
-        if self.keybind.registered_keys:
+        if self.keybind.list_keys:
             log.debug('Keybinds are disabled')
 
         for arg, value in kwargs.items():

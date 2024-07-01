@@ -35,7 +35,7 @@ def test_register_keybind(key_manager: KeyManager, test_keybind: tuple[str, str,
         code=10,
         description=description,
         hidden=hidden,
-        callback=lambda: None,
+        action=lambda: None,
     )
     registered_keybind = key_manager.register(keybind)
     assert registered_keybind == keybind
@@ -49,7 +49,7 @@ def test_register_and_replace_keybind(key_manager: KeyManager, test_keybind: tup
         code=10,
         description=description,
         hidden=hidden,
-        callback=lambda: None,
+        action=lambda: None,
     )
     key_manager.register(keybind)
     key_manager.register(keybind, exist_ok=True)
@@ -63,7 +63,7 @@ def test_register_existing_keybind(key_manager: KeyManager, test_keybind: tuple[
         code=10,
         description=description,
         hidden=hidden,
-        callback=lambda: None,
+        action=lambda: None,
     )
     key_manager.register(keybind)
     with pytest.raises(KeybindError):
@@ -78,11 +78,11 @@ def test_unregister_keybind(key_manager: KeyManager, test_keybind: tuple[str, st
         code=10,
         description=description,
         hidden=hidden,
-        callback=lambda: None,
+        action=lambda: None,
     )
     key_manager.register(keybind)
     key_manager.unregister(keybind.code)
-    assert key_manager.registered_keys == []
+    assert key_manager.list_keys == []
 
 
 def test_unregister_keybind_error(key_manager: KeyManager) -> None:
@@ -95,7 +95,7 @@ def test_toggle_all_keybinds(key_manager: KeyManager) -> None:
     key_manager.add('CTRL+Z', 'Undo last action', lambda: None)
     key_manager.add('CTRL+X', 'Cut selected text', lambda: None)
     key_manager.toggle_all()
-    for keybind in key_manager.registered_keys:
+    for keybind in key_manager.list_keys:
         assert keybind.hidden
 
 

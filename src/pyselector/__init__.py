@@ -13,7 +13,7 @@ menu = pyselector.Menu.rofi()
 menu.keybind.add(
     key="alt-n",
     description="sort by recent",
-    callback=lambda: None,
+    action=lambda: None,
     hidden=False,
 )
 selected_option, keycode = menu.prompt(options)
@@ -29,4 +29,4 @@ Menu.register('dmenu', Dmenu)
 Menu.register('rofi', Rofi)
 Menu.register('fzf', Fzf)
 
-__version__ = '0.0.28'
+__version__ = '0.0.30'

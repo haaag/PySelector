@@ -25,9 +25,9 @@ def items() -> list[str]:
 
 def test_build_args(rofi) -> None:
     alt_r = rofi.keybind.add(
-        key='alt-r',
+        bind='alt-r',
         description='Testing add keybind',
-        callback=lambda: None,
+        action=lambda: None,
     )
     args = rofi._build_args(
         case_sensitive=True,
