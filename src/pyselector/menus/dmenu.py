@@ -6,6 +6,8 @@ import shlex
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import Sequence
+from typing import TypeVar
 
 from pyselector import constants
 from pyselector import extract
@@ -16,6 +18,8 @@ if TYPE_CHECKING:
     from pyselector.interfaces import PromptReturn
 
 log = logging.getLogger(__name__)
+
+T = TypeVar('T')
 
 
 class Dmenu:
@@ -66,7 +70,7 @@ class Dmenu:
 
     def prompt(
         self,
-        items: list[Any] | tuple[Any] | None = None,
+        items: Sequence[T] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = constants.PROMPT,
@@ -77,7 +81,7 @@ class Dmenu:
            and returns the selected item and code.
 
         Args:
-            items (Iterable[str, int], optional):  The items to display in the rofi window
+            items (Sequence[str, int], optional):  The items to display in the rofi window
             case_sensitive (bool, optional):       Whether or not to perform a case-sensitive search
             multi_select (bool, optional):         Whether or not to allow the user to select multiple items
             prompt (str, optional):                The prompt to display in the rofi window
@@ -96,7 +100,7 @@ class Dmenu:
             items = []
 
         args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
-        selected, code = helpers._execute(args, items)
+        selected, code = helpers.run(args, items)
 
         if not selected:
             return None, code

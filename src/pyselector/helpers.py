@@ -7,13 +7,15 @@ import shutil
 import subprocess
 from typing import Any
 from typing import Callable
-from typing import Iterable
 from typing import Sequence
+from typing import TypeVar
 
 from pyselector.interfaces import ExecutableNotFoundError
-from pyselector.interfaces import UserCancelSelection
+from pyselector.interfaces import UserCancel
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar('T')
 
 
 def check_command(name: str, reference: str) -> str:
@@ -24,21 +26,19 @@ def check_command(name: str, reference: str) -> str:
     return command
 
 
-def check_type(items: Iterable[Any]) -> None:
+def check_type(items: Sequence[T]) -> None:
+    items_type = type(items).__name__
     if not isinstance(items, (tuple, list)):
-        msg = 'items must be a tuple or list'
-        raise ValueError(msg)
-    if not isinstance(items, Iterable):
-        msg = 'items must be iterable.'
+        msg = f'items must be a tuple or list, got a {items_type}.'
         raise ValueError(msg)
     if not isinstance(items, Sequence):
-        msg = 'items must be a sequence or indexable.'
+        msg = f'items must be a sequence or indexable, got a {items_type}.'
         raise ValueError(msg)
 
 
-def _execute(
+def run(
     args: list[str],
-    items: list[Any] | tuple[Any],
+    items: Sequence[T],
     preprocessor: Callable[..., Any] | None = None,
 ) -> tuple[str | None, int]:
     logger.debug('executing: %s', args)
@@ -47,7 +47,7 @@ def _execute(
     preprocessor = preprocessor or str
 
     with subprocess.Popen(
-        args,  # noqa: S603
+        args,
         stdout=subprocess.PIPE,
         stdin=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
@@ -59,6 +59,6 @@ def _execute(
 
     if not selected:
         return None, return_code
-    if return_code == UserCancelSelection(1):
+    if return_code == UserCancel(1):
         return selected, return_code
     return selected, return_code

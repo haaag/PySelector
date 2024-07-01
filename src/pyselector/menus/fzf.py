@@ -98,7 +98,7 @@ class Fzf:
             items = []
 
         args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
-        selected, code = helpers._execute(args, items, preprocessor)
+        selected, code = helpers.run(args, items, preprocessor)
 
         if code == fzf_interrupted_code:
             return None, 1

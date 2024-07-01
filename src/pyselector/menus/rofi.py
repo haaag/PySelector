@@ -7,11 +7,13 @@ import sys
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import Sequence
+from typing import TypeVar
 
 from pyselector import constants
 from pyselector import extract
 from pyselector import helpers
-from pyselector.interfaces import UserCancelSelection
+from pyselector.interfaces import UserCancel
 from pyselector.key_manager import KeyManager
 
 if TYPE_CHECKING:
@@ -20,8 +22,8 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+T = TypeVar('T')
 ROFI_RETURN_CODE_START = 10
-BULLET = '\u2022'
 
 
 class Rofi:
@@ -49,7 +51,7 @@ class Rofi:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_args(self, case_sensitive, multi_select, prompt, **kwargs) -> list[str]:  # noqa: C901, PLR0912
+    def _build_args(self, case_sensitive: bool, multi_select: bool, prompt: str, **kwargs) -> list[str]:  # noqa: C901, PLR0912
         messages: list[str] = []
         dimensions_args: list[str] = []
         args = []
@@ -101,7 +103,7 @@ class Rofi:
         for key in self.keybind.registered_keys:
             args.extend(shlex.split(f'-kb-custom-{key.id} {key.bind}'))
             if not key.hidden:
-                messages.append(f'{BULLET} Use <{key.bind}> {key.description}')
+                messages.append(f'{constants.BULLET} Use <{key.bind}> {key.description}')
 
         if messages:
             mesg = '\n'.join(messages)
@@ -117,7 +119,7 @@ class Rofi:
 
     def prompt(
         self,
-        items: list[Any] | tuple[Any] | None = None,
+        items: Sequence[T] | None = None,
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = constants.PROMPT,
@@ -156,9 +158,9 @@ class Rofi:
             items = []
 
         args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
-        selected, code = helpers._execute(args, items, preprocessor)
+        selected, code = helpers.run(args, items, preprocessor)
 
-        if not selected or code == UserCancelSelection(1):
+        if not selected or code == UserCancel(1):
             return None, code
 
         if multi_select:

@@ -6,13 +6,18 @@ from typing import Any
 from typing import Callable
 from typing import NewType
 from typing import Protocol
+from typing import Sequence
+from typing import TypeVar
+
+from pyselector.constants import PROMPT
 
 if TYPE_CHECKING:
     from pyselector.key_manager import KeyManager
 
-PromptReturn = tuple[Any, int]
-UserConfirmsSelection = NewType('UserConfirmsSelection', int)
-UserCancelSelection = NewType('UserCancelSelection', int)
+T = TypeVar('T')
+PromptReturn = tuple[T, int]
+UserConfirms = NewType('UserConfirms', int)
+UserCancel = NewType('UserCancel', int)
 
 
 class ExecutableNotFoundError(Exception):
@@ -26,15 +31,31 @@ class MenuInterface(Protocol):
 
     @property
     def command(self) -> str:
-        ...
+        """Returns the command to execute for the menu."""
 
     def prompt(
         self,
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool | None = None,
         multi_select: bool = False,
-        prompt: str = 'PySelector> ',
+        prompt: str = PROMPT,
         preprocessor: Callable[..., Any] | None = None,
         **kwargs,
-    ) -> PromptReturn:
-        ...
+    ) -> PromptReturn: ...
+
+    def select(
+        self,
+        items: Sequence[T],
+        hide_keys: bool = False,
+        **kwargs,
+    ) -> T | None:
+        """Shows items in the menu and returns the selected item"""
+
+    def input(self, prompt: str = PROMPT, validation: Callable[..., T] | None = None) -> str:
+        """Shows a prompt in the menu and returns the user's input"""
+
+    def confirm(self, question: str, options: Sequence[str]) -> bool:
+        """Prompt the user with a question and a list of options."""
+
+    def supported_args(self) -> str:
+        """Shows a list of supported arguments for the menu"""

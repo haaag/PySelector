@@ -97,6 +97,7 @@ def test_extract_item(_, input, selected, expected):
         ),
     ],
 )
+
 def test_extract_index(_, input, selected, expected):
     assert extract.index(input, selected) == expected
 

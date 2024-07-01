@@ -4,8 +4,11 @@ from __future__ import annotations
 import logging
 from typing import Any
 from typing import Callable
+from typing import TypeVar
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar('T')
 
 
 def get_items_strings(
@@ -15,7 +18,7 @@ def get_items_strings(
     if not items:
         return []
     preprocessor = preprocessor or str
-    return '\n'.join(map(preprocessor, items)).split('\n')
+    return list(filter(None, '\n'.join(map(preprocessor, items)).split('\n')))
 
 
 def item(

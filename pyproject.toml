@@ -116,7 +116,7 @@ extend-select = [
   "TID", # (flake8-tidy-imports)
   "YTT", # (flake8-2020)
 ]
-ignore = ["Q000", "Q003"]
+ignore = ["Q000", "Q003", "S603"]
 
 [tool.ruff.lint.isort]
 force-single-line = true
