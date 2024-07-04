@@ -203,3 +203,29 @@ class KeyManager:
                 return key
         msg = f'No keybind found with {bind=}'
         raise KeybindError(msg) from None
+
+    def get_by_code_list(self, code_list: list[int]) -> list[Keybind]:
+        """Returns the keybinds with the specified codes."""
+        return [self.get_by_code(code) for code in code_list]
+
+    def get_by_bind_list(self, bind_list: list[str]) -> list[Keybind]:
+        """Returns the keybinds with the specified binds."""
+        return [self.get_by_bind(bind) for bind in bind_list]
+
+    def unregister_by_code(self, code_list: list[int]) -> list[Keybind]:
+        """Removes the keybinds with the specified codes."""
+        return [self.unregister(code) for code in code_list]
+
+    def unregister_by_bind(self, bind_list: list[str]) -> list[Keybind]:
+        """Removes the keybinds with the specified binds."""
+        return [self.unregister(self.get_by_bind(bind).code) for bind in bind_list]
+
+    def unregister_by_list(self, key_list: list[Keybind]) -> list[Keybind]:
+        """Removes the specified keybinds."""
+        return [self.unregister(k.code) for k in key_list]
+
+    def __str__(self) -> str:
+        return '\n'.join([str(k) for k in self.list_keys])
+
+    def __repr__(self):
+        return self.__str__()
