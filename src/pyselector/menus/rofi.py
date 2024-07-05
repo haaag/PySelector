@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 import shlex
-import sys
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
@@ -13,6 +12,7 @@ from typing import TypeVar
 from pyselector import constants
 from pyselector import extract
 from pyselector import helpers
+from pyselector.interfaces import Arg
 from pyselector.interfaces import UserCancel
 from pyselector.key_manager import KeyManager
 
@@ -24,6 +24,50 @@ log = logging.getLogger(__name__)
 
 T = TypeVar('T')
 ROFI_RETURN_CODE_START = 10
+
+LOCATION = {
+    'upper-left': 1,
+    'left': 8,
+    'bottom-left': 7,
+    'upper-center': 2,
+    'center': 0,
+    'bottom-center': 6,
+    'upper-right': 3,
+    'right': 4,
+    'bottom-right': 5,
+}
+
+SUPPORTED_ARGS = {
+    'name': Arg('rofi', 'rofi', str),
+    'url': Arg('', constants.HOMEPAGE_ROFI, str),
+    'markup': Arg('-markup-rows', 'enable markup in rows', bool),
+    'prompt': Arg('-p', 'set prompt', str),
+    'lines': Arg('-l', 'set number of lines', int),
+    'mesg': Arg('-mesg', 'set message', str),
+    'location': Arg('-location', f'Specify where the window should be located. {tuple(LOCATION.keys())}', int),
+    'width': Arg('-width', 'set width in percentage', str),
+    'height': Arg('-height', 'set height in percentage', str),
+    'theme': Arg('-theme', 'Path to the new theme file format. This overrides the old theme settings', str),
+    'filter': Arg('-filter', 'Filter the list by setting text in input bar to filter', str),
+}
+
+
+def location(direction: str = 'center') -> str:
+    """
+    Specify where the window should be located. The numbers map to the
+    following locations on screen:
+
+        1 2 3
+        8 0 4
+        7 6 5
+
+    Default: 0
+    """
+    try:
+        return str(LOCATION[direction])
+    except KeyError as e:
+        msg = 'location %s not found.\nchosse from %s'
+        raise KeyError(msg, e, list(LOCATION.keys())) from e
 
 
 class Rofi:
@@ -51,70 +95,85 @@ class Rofi:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_args(self, case_sensitive: bool, multi_select: bool, prompt: str, **kwargs) -> list[str]:  # noqa: C901, PLR0912
-        messages: list[str] = []
-        dimensions_args: list[str] = []
-        args = []
+    def _build_dimensions(self, kwargs) -> list[str]:
+        dimensions: list[str] = []
+        w = kwargs.pop('width', None)
+        h = kwargs.pop('height', None)
 
-        args.extend(shlex.split(self.command))
-        args.append('-dmenu')
-        args.append('-sync')
+        if not w and not h:
+            return dimensions
+
+        if w:
+            dimensions.append(f'width: {w};')
+        if h:
+            dimensions.append(f'height: {h};')
+
+        return shlex.split("-theme-str 'window {" + ' '.join(dimensions) + "}'")
+
+    def _build_mesg(self, kwargs) -> list[str]:
+        messages: list[str] = []
+        m = kwargs.pop('mesg', None)
+
+        if m:
+            messages.extend(shlex.split(shlex.quote(m)))
+
+        for key in self.keybind.list_keys:
+            if not key.hidden:
+                messages.append(f'{constants.BULLET} Use <{key.bind}> {key.description}')
+
+        if len(messages) == 0:
+            return messages
+
+        result = '\n'.join(messages)
+        return shlex.split(f'-mesg {shlex.quote(result)}')
+
+    def _build_title_markup(self, kwargs) -> list[str]:
+        markup = 'true' if kwargs.pop('title_markup', False) else 'false'
+        return shlex.split(f"-theme-str 'textbox {{ markup: {markup};}}'")
+
+    def _build_keybinds(self, args: list[str]) -> None:
+        if len(self.keybind.list_keys) == 0:
+            return
+
+        for key in self.keybind.list_keys:
+            args.extend(shlex.split(f'-kb-custom-{key.id} {key.bind}'))
+
+    def _build_args(
+        self,
+        case_sensitive: bool = False,
+        multi_select: bool = False,
+        prompt: str = constants.PROMPT,
+        **kwargs,
+    ) -> list[str]:
+        args = shlex.split(self.command)
+        args.extend(['-dmenu', '-sync'])
+        args.extend(['-p', prompt])
+        args.extend(['-l', str(kwargs.pop('lines', 10))])
 
         if kwargs.get('theme'):
             args.extend(['-theme', kwargs.pop('theme')])
 
-        if kwargs.get('lines'):
-            args.extend(['-l', str(kwargs.pop('lines'))])
-
-        if prompt:
-            args.extend(['-p', prompt])
-
         if kwargs.pop('markup', False):
             args.append('-markup-rows')
-
-        if kwargs.get('mesg'):
-            messages.extend(shlex.split(shlex.quote(kwargs.pop('mesg'))))
 
         if kwargs.get('filter'):
             args.extend(['-filter', kwargs.pop('filter')])
 
         if kwargs.get('location'):
             direction = kwargs.pop('location')
-            args.extend(['-location', self.location(direction)])
-
-        if kwargs.get('width'):
-            dimensions_args.append(f"width: {kwargs.pop('width')};")
-
-        if kwargs.get('height'):
-            dimensions_args.append(f"height: {kwargs.pop('height')};")
-
-        if case_sensitive:
-            args.append('-case-sensitive')
-        else:
-            args.append('-i')
+            args.extend(['-location', location(direction)])
 
         if multi_select:
             args.append('-multi-select')
 
-        if dimensions_args:
-            formatted_string = ' '.join(dimensions_args)
-            args.extend(shlex.split("-theme-str 'window {" + formatted_string + "}'"))
+        self._build_keybinds(args)
+        args.append('-case-sensitive' if case_sensitive else '-i')
+        args.extend(self._build_dimensions(kwargs))
+        args.extend(self._build_mesg(kwargs))
+        args.extend(self._build_title_markup(kwargs))
 
-        for key in self.keybind.list_keys:
-            args.extend(shlex.split(f'-kb-custom-{key.id} {key.bind}'))
-            if not key.hidden:
-                messages.append(f'{constants.BULLET} Use <{key.bind}> {key.description}')
-
-        if messages:
-            mesg = '\n'.join(messages)
-            args.extend(shlex.split(f'-mesg {shlex.quote(mesg)}'))
-
-        if kwargs:
-            for arg, value in kwargs.items():
-                log.debug("'%s=%s' not supported", arg, value)
-
-        title_markup = 'true' if kwargs.pop('title_markup', False) else 'false'
-        args.extend(shlex.split(f"-theme-str 'textbox {{ markup: {title_markup};}}'"))
+        for arg, value in kwargs.items():
+            log.debug("'%s=%s' not supported in '%s'", arg, value, self.name)
         return args
 
     def prompt(
@@ -174,32 +233,5 @@ class Rofi:
 
         return result, code
 
-    @staticmethod
-    def location(direction: str = 'center') -> str:
-        """
-        Specify where the window should be located. The numbers map to the
-        following locations on screen:
-
-            1 2 3
-            8 0 4
-            7 6 5
-
-        Default: 0
-        """
-        try:
-            location = {
-                'upper-left': 1,
-                'left': 8,
-                'bottom-left': 7,
-                'upper-center': 2,
-                'center': 0,
-                'bottom-center': 6,
-                'upper-right': 3,
-                'right': 4,
-                'bottom-right': 5,
-            }
-            return str(location[direction])
-        except KeyError as e:
-            msg = 'location %s not found.\nchosse from %s'
-            raise KeyError(msg, e, list(location.keys())) from e
-            sys.exit(1)
+    def supported(self) -> str:
+        return '\n'.join(f'{k:<10} {v.type.__name__.upper():<5} {v.help}' for k, v in SUPPORTED_ARGS.items())

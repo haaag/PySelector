@@ -12,6 +12,7 @@ from typing import TypeVar
 from pyselector import constants
 from pyselector import extract
 from pyselector import helpers
+from pyselector.interfaces import Arg
 from pyselector.key_manager import KeyManager
 
 if TYPE_CHECKING:
@@ -20,6 +21,20 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 T = TypeVar('T')
+
+SUPPORTED_ARGS: dict[str, Arg] = {
+    'name': Arg('dmenu', 'dmenu', str),
+    'url': Arg('url', constants.HOMEPAGE_DMENU, str),
+    'prompt': Arg('-p', 'defines the prompt to be displayed to the left of the input field', str),
+    'lines': Arg('lines', 'dmenu lists items vertically, with the given number of lines', int),
+    'bottom': Arg('bottom', 'dmenu appears at the bottom of the screen', bool),
+    # FIX: create _build_font fn
+    'fn': Arg('fn', 'defines the font or font set used', str),
+    'nb': Arg('nb', 'defines the normal background color', str),
+    'nf': Arg('nf', 'defines the normal foreground color', str),
+    'sb': Arg('sb', 'defines the selected background color', str),
+    'sf': Arg('sf', 'defines the selected foreground color', str),
+}
 
 
 class Dmenu:
@@ -34,9 +49,9 @@ class Dmenu:
 
     def _build_args(
         self,
-        case_sensitive,
-        multi_select,
-        prompt,
+        case_sensitive: bool = False,
+        multi_select: bool = False,
+        prompt: str = constants.PROMPT,
         **kwargs,
     ) -> list[str]:
         args = shlex.split(self.command)
@@ -112,3 +127,6 @@ class Dmenu:
             return selected, 1
 
         return result, code
+
+    def supported(self) -> str:
+        return '\n'.join(f'{k:<10} {v.type.__name__.upper():<5} {v.help}' for k, v in SUPPORTED_ARGS.items())

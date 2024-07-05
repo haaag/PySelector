@@ -135,14 +135,14 @@ class KeyManager:
             self.unregister(key.code)
 
         if self.keys.get(key.code):
-            log.error('%s already registered', key.bind)
-            msg = f'{key.bind=} already registered'
-            raise KeybindError(msg)
+            err = f'{key.bind=} already registered'
+            log.error(err)
+            raise KeybindError(err)
 
         self.key_count += 1
         self.code_count += 1
         self.keys[key.code] = key
-        log.debug(f'registered keybind={key.bind}')
+        log.debug(f'registered keybind={key}')
         return key
 
     def register_all(self, keys: list[Keybind], exist_ok: bool = False) -> None:

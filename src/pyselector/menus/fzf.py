@@ -10,12 +10,24 @@ from typing import Callable
 from pyselector import constants
 from pyselector import extract
 from pyselector import helpers
+from pyselector.interfaces import Arg
 from pyselector.key_manager import KeyManager
 
 if TYPE_CHECKING:
     from pyselector.interfaces import PromptReturn
 
 log = logging.getLogger(__name__)
+
+SUPPORTED_ARGS: dict[str, Arg] = {
+    'prompt': Arg('--prompt', 'set prompt', str),
+    'cycle': Arg('--cycle', 'enable cyclic scroll', bool),
+    'preview': Arg('--preview', 'enable preview', bool),
+    'mesg': Arg('--header', 'The given string will be printed as the sticky header', str),
+    'height': Arg(
+        '--height', 'Display fzf window below the cursor with the given height instead of using the full screen', str
+    ),
+    'input': Arg('--print-query', 'Print query as the first line', bool),
+}
 
 
 class Fzf:
@@ -30,9 +42,9 @@ class Fzf:
 
     def _build_args(  # noqa: C901
         self,
-        case_sensitive,
-        multi_select,
-        prompt,
+        case_sensitive: bool = False,
+        multi_select: bool = False,
+        prompt: str = constants.PROMPT,
         **kwargs,
     ) -> list[str]:
         header: list[str] = []
@@ -60,7 +72,6 @@ class Fzf:
             args.append('--multi')
 
         # FIX: Do keybinds for FZF
-        # log.warning("keybinds are disabled")
         if self.keybind.list_keys:
             log.debug('Keybinds are disabled')
 
@@ -79,7 +90,7 @@ class Fzf:
     def prompt(
         self,
         items: list[Any] | tuple[Any] | None = None,
-        case_sensitive: bool | None = None,
+        case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = constants.PROMPT,
         preprocessor: Callable[..., Any] | None = None,
@@ -116,3 +127,6 @@ class Fzf:
             return selected, 1
 
         return result, code
+
+    def supported(self) -> str:
+        return '\n'.join(f'{k:<10} {v.type.__name__.upper():<5} {v.help}' for k, v in SUPPORTED_ARGS.items())

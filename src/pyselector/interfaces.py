@@ -1,6 +1,7 @@
 # interface.py
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
@@ -18,6 +19,13 @@ T = TypeVar('T')
 PromptReturn = tuple[T, int]
 UserConfirms = NewType('UserConfirms', int)
 UserCancel = NewType('UserCancel', int)
+
+
+@dataclass
+class Arg:
+    param: str
+    help: str
+    type: type
 
 
 class ExecutableNotFoundError(Exception):
@@ -57,5 +65,5 @@ class MenuInterface(Protocol):
     def confirm(self, question: str, options: Sequence[str]) -> bool:
         """Prompt the user with a question and a list of options."""
 
-    def supported_args(self) -> str:
+    def supported(self) -> str:
         """Shows a list of supported arguments for the menu"""
