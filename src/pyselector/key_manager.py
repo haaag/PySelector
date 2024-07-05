@@ -40,14 +40,14 @@ class Keybind:
 
     def toggle(self) -> None:
         """Toggles the visibility of the keybind in the user interface."""
-        log.debug('Toggling keybind=%s %s', self.hidden, self.bind)
+        log.debug('toggling keybind=%s %s', self.hidden, self.bind)
         self.hidden = not self.hidden
 
     def show(self) -> None:
-        self.hidden = True
+        self.hidden = False
 
     def hide(self) -> None:
-        self.hidden = False
+        self.hidden = True
 
     def __hash__(self):
         return hash((self.code, self.description))
@@ -86,7 +86,7 @@ class KeyManager:
         Registers a new keybind with the specified bind and description,
         and associates it with the specified action function.
         """
-
+        log.debug(f'adding keybind={bind} {description}')
         return self.register(
             Keybind(
                 id=self.key_count,
@@ -105,11 +105,13 @@ class KeyManager:
             err_msg = f'No keybind found with {code=}'
             log.error(err_msg)
             raise KeybindError(err_msg)
+        log.debug(f'removing keybind={self.keys[code].bind}')
         return self.keys.pop(code)
 
     def unregister_all(self) -> list[Keybind]:
         """Removes all registered keybinds."""
         keys = list(self.keys.values())
+        log.debug(f'removing {len(keys)} keybinds')
         self.keys.clear()
         return keys
 
@@ -125,6 +127,10 @@ class KeyManager:
         Raises:
             KeybindError: If `exist_ok` is False and a keybind with the same bind is already registered.
         """
+        if key is None:
+            err = 'key is None'
+            raise KeybindError(err)
+
         if exist_ok and self.keys.get(key.code):
             self.unregister(key.code)
 
@@ -136,6 +142,7 @@ class KeyManager:
         self.key_count += 1
         self.code_count += 1
         self.keys[key.code] = key
+        log.debug(f'registered keybind={key.bind}')
         return key
 
     def register_all(self, keys: list[Keybind], exist_ok: bool = False) -> None:
@@ -151,7 +158,7 @@ class KeyManager:
         """Hides all keybinds."""
         for key in self.list_keys:
             if not key.hidden:
-                key.hidden = True
+                key.hide()
 
     def toggle_all(self) -> None:
         """Toggles the "hidden" property of all non-hidden keybinds."""
@@ -186,7 +193,9 @@ class KeyManager:
             KeybindError: If no keybind is found with the specified code.
         """
         try:
-            return self.keys[code]
+            key = self.keys[code]
+            log.debug(f'found keybind={key.bind}')
+            return key
         except KeyError:
             msg = f'No keybind found with {code=}'
             raise KeybindError(msg) from None
@@ -200,6 +209,7 @@ class KeyManager:
         """
         for key in self.list_keys:
             if key.bind == bind:
+                log.debug(f'found keybind={key.bind}')
                 return key
         msg = f'No keybind found with {bind=}'
         raise KeybindError(msg) from None
