@@ -47,7 +47,7 @@ class MenuInterface(Protocol):
         case_sensitive: bool | None = None,
         multi_select: bool = False,
         prompt: str = PROMPT,
-        preprocessor: Callable[..., Any] | None = None,
+        preprocessor: Callable[..., Any] = lambda x: str(x),
         **kwargs,
     ) -> PromptReturn: ...
 
@@ -59,7 +59,7 @@ class MenuInterface(Protocol):
     ) -> T | None:
         """Shows items in the menu and returns the selected item"""
 
-    def input(self, prompt: str = PROMPT, validation: Callable[..., T] | None = None) -> str:
+    def input(self, prompt: str = PROMPT) -> str:
         """Shows a prompt in the menu and returns the user's input"""
 
     def confirm(self, question: str, options: Sequence[str]) -> bool:

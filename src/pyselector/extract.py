@@ -47,7 +47,7 @@ def item(
         idx = items_str.index(selected)
         return items[idx]
     except ValueError as err:
-        logger.warning(f'{err}. Returning items={selected}')
+        logger.debug(f'{err}. returning items={selected}')
     return None
 
 

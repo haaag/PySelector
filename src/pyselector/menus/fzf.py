@@ -8,7 +8,6 @@ from typing import Any
 from typing import Callable
 
 from pyselector import constants
-from pyselector import extract
 from pyselector import helpers
 from pyselector.interfaces import Arg
 from pyselector.key_manager import KeyManager
@@ -17,6 +16,8 @@ if TYPE_CHECKING:
     from pyselector.interfaces import PromptReturn
 
 log = logging.getLogger(__name__)
+
+FZF_INTERRUPTED_CODE = 130
 
 SUPPORTED_ARGS: dict[str, Arg] = {
     'prompt': Arg('--prompt', 'set prompt', str),
@@ -49,6 +50,7 @@ class Fzf:
     ) -> list[str]:
         header: list[str] = []
         args = shlex.split(self.command)
+        args.append('--ansi')
 
         if case_sensitive is not None:
             args.append('+i' if case_sensitive else '-i')
@@ -93,7 +95,7 @@ class Fzf:
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = constants.PROMPT,
-        preprocessor: Callable[..., Any] | None = None,
+        preprocessor: Callable[..., Any] = lambda x: str(x),
         **kwargs,
     ) -> PromptReturn:
         """
@@ -103,7 +105,7 @@ class Fzf:
             2      Error
             130    Interrupted with CTRL-C or ESC
         """
-        fzf_interrupted_code = 130
+        helpers.check_type(items)
 
         if not items:
             items = []
@@ -111,22 +113,27 @@ class Fzf:
         args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
         selected, code = helpers.run(args, items, preprocessor)
 
-        if code == fzf_interrupted_code:
+        if code == FZF_INTERRUPTED_CODE:
             return None, 1
 
         if not selected:
             return selected, code
 
-        if multi_select:
-            result = extract.items(items, selected, preprocessor)
-        else:
-            result = extract.item(items, selected, preprocessor)
+        result: Any = None
+
+        for item in items:
+            if helpers.remove_color_codes(preprocessor(item)) == selected:
+                result = item
+                break
 
         if not result:
             log.warning('result is empty')
             return selected, 1
 
         return result, code
+
+    def input(self, prompt: str = constants.PROMPT) -> str:
+        raise NotImplementedError
 
     def supported(self) -> str:
         return '\n'.join(f'{k:<10} {v.type.__name__.upper():<5} {v.help}' for k, v in SUPPORTED_ARGS.items())

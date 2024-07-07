@@ -10,7 +10,6 @@ from typing import Sequence
 from typing import TypeVar
 
 from pyselector import constants
-from pyselector import extract
 from pyselector import helpers
 from pyselector.interfaces import Arg
 from pyselector.key_manager import KeyManager
@@ -89,7 +88,7 @@ class Dmenu:
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = constants.PROMPT,
-        preprocessor: Callable[..., Any] | None = None,
+        preprocessor: Callable[..., Any] = lambda x: str(x),
         **kwargs,
     ) -> PromptReturn:
         """Prompts the user with a rofi window containing the given items
@@ -111,16 +110,22 @@ class Dmenu:
         Returns:
             A tuple containing the selected item (str or list of str) and the return code (int).
         """
+        helpers.check_type(items)
+
         if items is None:
             items = []
 
         args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
-        selected, code = helpers.run(args, items)
+        selected, code = helpers.run(args, items, preprocessor)
 
         if not selected:
             return None, code
 
-        result = extract.item(items, selected, preprocessor)
+        result: Any = None
+        for item in items:
+            if preprocessor(item) == selected:
+                result = item
+                break
 
         if not result:
             log.warning('result is empty')

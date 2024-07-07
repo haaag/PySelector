@@ -5,6 +5,30 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+COLORS = {
+    'black': '0;0;0',
+    'red': '255;0;0',
+    'green': '0;255;0',
+    'yellow': '255;255;0',
+    'blue': '0;0;255',
+    'magenta': '255;0;255',
+    'cyan': '0;255;255',
+    'white': '255;255;255',
+    'gray': '128;128;128',
+    'grey': '128;128;128',
+    'orange': '255;165;0',
+    'purple': '128;0;128',
+    'brown': '165;42;42',
+    'lime': '0;255;0',
+    'olive': '128;128;0',
+    'teal': '0;128;128',
+    'navy': '0;0;128',
+    'fuchsia': '255;0;255',
+    'aqua': '0;255;255',
+    'maroon': '128;0;0',
+    'silver': '192;192;192',
+}
+
 
 @dataclass
 class PangoSpan:
@@ -50,6 +74,17 @@ class PangoSpan:
     variant: str | None = None
     weight: str | None = None
     markup: bool = True
+    # ansi
+    ansi: bool = False
+    fg_ansi: str | None = None
+    bg_ansi: str | None = None
+
+    def _format_ansi(self, text: str) -> str:
+        if self.fg_ansi in COLORS:
+            text = f'\033[38;2;{COLORS[self.fg_ansi]}m{text}'
+        if self.bg_ansi in COLORS:
+            text = f'\033[48;2;{COLORS[self.bg_ansi]}m{text}'
+        return f'{text}\033[0m'
 
     def __hash__(self):
         attrs = tuple(self.__dict__[attr] for attr in sorted(self.__dict__.keys()) if attr not in ('text', 'sub'))
@@ -61,7 +96,15 @@ class PangoSpan:
 
         attrs = []
         for attr in self.__dict__:
-            if attr != 'text' and attr != 'markup' and attr != 'sub' and self.__dict__[attr] is not None:
+            if (
+                attr != 'text'
+                and attr != 'markup'
+                and attr != 'sub'
+                and attr != 'ansi'
+                and attr != 'fg_ansi'
+                and attr != 'bg_ansi'
+                and self.__dict__[attr] is not None
+            ):
                 attrs.append(f'{attr}="{self.__dict__[attr]}"')
 
         text = self.text

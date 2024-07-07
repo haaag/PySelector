@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import shutil
 import subprocess
 from typing import Any
@@ -39,12 +40,9 @@ def check_type(items: Sequence[T]) -> None:
 def run(
     args: list[str],
     items: Sequence[T],
-    preprocessor: Callable[..., Any] | None = None,
+    preprocessor: Callable[..., Any],
 ) -> tuple[str | None, int]:
     logger.debug('executing: %s', args)
-    check_type(items)
-
-    preprocessor = preprocessor or str
 
     with subprocess.Popen(
         args,
@@ -59,6 +57,24 @@ def run(
 
     if not selected:
         return None, return_code
+    selected = selected.strip()
+
     if return_code == UserCancel(1):
         return selected, return_code
+
     return selected, return_code
+
+
+def remove_color_codes(text: str) -> str:
+    """
+    Removes ANSI escape codes representing color information from a string.
+
+    Args:
+        text (str): The text potentially containing ANSI color codes.
+
+    Returns:
+        str: The text with color codes removed.
+    """
+
+    color_code_pattern = r'\033\[[\d;]*m'
+    return re.sub(color_code_pattern, '', text)

@@ -10,7 +10,6 @@ from typing import Sequence
 from typing import TypeVar
 
 from pyselector import constants
-from pyselector import extract
 from pyselector import helpers
 from pyselector.interfaces import Arg
 from pyselector.interfaces import UserCancel
@@ -182,7 +181,7 @@ class Rofi:
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = constants.PROMPT,
-        preprocessor: Callable[..., Any] | None = None,
+        preprocessor: Callable[..., Any] = lambda x: str(x),
         **kwargs,
     ) -> PromptReturn:
         """Prompts the user with a rofi window containing the given items
@@ -213,6 +212,8 @@ class Rofi:
             1: User cancelled the selection.
             10-28: Row accepted by custom keybinding.
         """
+        helpers.check_type(items)
+
         if items is None:
             items = []
 
@@ -222,16 +223,26 @@ class Rofi:
         if not selected or code == UserCancel(1):
             return None, code
 
-        if multi_select:
-            result = extract.items(items, selected, preprocessor)
-        else:
-            result = extract.item(items, selected, preprocessor)
+        # 'multi-select' is not supported, for now
+        # if multi_select:
+        #     result = extract.items(items, selected, preprocessor)
+        # else:
+        #     result = extract.item(items, selected, preprocessor)
+
+        result: Any = None
+        for item in items:
+            if preprocessor(item) == selected:
+                result = item
+                break
 
         if not result:
-            log.warning('result is empty')
+            log.debug('result is empty')
             return selected, 1
 
         return result, code
+
+    def input(self, prompt: str = constants.PROMPT) -> str:
+        raise NotImplementedError
 
     def supported(self) -> str:
         return '\n'.join(f'{k:<10} {v.type.__name__.upper():<5} {v.help}' for k, v in SUPPORTED_ARGS.items())
