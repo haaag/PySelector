@@ -1,33 +1,39 @@
 # markup.py
+#
 # https://docs.gtk.org/Pango/pango_markup.html
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
-COLORS = {
-    'black': '0;0;0',
-    'red': '255;0;0',
-    'green': '0;255;0',
-    'yellow': '255;255;0',
-    'blue': '0;0;255',
-    'magenta': '255;0;255',
-    'cyan': '0;255;255',
-    'white': '255;255;255',
-    'gray': '128;128;128',
-    'grey': '128;128;128',
-    'orange': '255;165;0',
-    'purple': '128;0;128',
-    'brown': '165;42;42',
-    'lime': '0;255;0',
-    'olive': '128;128;0',
-    'teal': '0;128;128',
-    'navy': '0;0;128',
-    'fuchsia': '255;0;255',
-    'aqua': '0;255;255',
-    'maroon': '128;0;0',
-    'silver': '192;192;192',
-}
+from pyselector.colors import SUPPORTED_COLORS
+
+log = logging.getLogger(__name__)
+
+
+def _ansi_foreground(text: str, color: str | None) -> str:
+    if not color:
+        return text
+
+    if color not in SUPPORTED_COLORS:
+        log.error("unknown foreground color '%s'", color)
+        return text
+
+    text = f'\033[38;2;{SUPPORTED_COLORS[color]}m{text}'
+    return f'{text}\033[0m'
+
+
+def _ansi_background(text: str, color: str | None) -> str:
+    if not color:
+        return text
+
+    if color not in SUPPORTED_COLORS:
+        log.error("unknown background color '%s'", color)
+        return text
+
+    text = f'\033[48;2;{SUPPORTED_COLORS[color]}m{text}'
+    return f'{text}\033[0m'
 
 
 @dataclass
@@ -74,23 +80,31 @@ class PangoSpan:
     variant: str | None = None
     weight: str | None = None
     markup: bool = True
-    # ansi
+    # ansi codes
     ansi: bool = False
     fg_ansi: str | None = None
     bg_ansi: str | None = None
-
-    def _format_ansi(self, text: str) -> str:
-        if self.fg_ansi in COLORS:
-            text = f'\033[38;2;{COLORS[self.fg_ansi]}m{text}'
-        if self.bg_ansi in COLORS:
-            text = f'\033[48;2;{COLORS[self.bg_ansi]}m{text}'
-        return f'{text}\033[0m'
 
     def __hash__(self):
         attrs = tuple(self.__dict__[attr] for attr in sorted(self.__dict__.keys()) if attr not in ('text', 'sub'))
         return hash((self.text, attrs))
 
+    def _format_ansi(self) -> str:
+        if self.fg_ansi:
+            self.text = _ansi_foreground(self.text, self.fg_ansi)
+        if self.bg_ansi:
+            self.text = _ansi_background(self.text, self.bg_ansi)
+        return self.text
+
     def __str__(self) -> str:
+        if self.markup and self.ansi:
+            err = 'markup and ansi are mutually exclusive'
+            log.error(err)
+            raise ValueError(err)
+
+        if self.ansi:
+            return self._format_ansi()
+
         if not self.markup:
             return self.text
 
