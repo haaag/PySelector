@@ -46,6 +46,26 @@ class Dmenu:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
+    def _build_fonts_and_ui(self, kwargs: dict[str, Any]) -> list[str]:
+        fonts_and_ui: list[str] = []
+
+        if kwargs.get('fn'):
+            fonts_and_ui.extend(['-fn', kwargs.pop('fn')])
+
+        if kwargs.get('nb'):
+            fonts_and_ui.extend(['-nb', kwargs.pop('nb')])
+
+        if kwargs.get('nf'):
+            fonts_and_ui.extend(['-nf', kwargs.pop('nf')])
+
+        if kwargs.get('sb'):
+            fonts_and_ui.extend(['-sb', kwargs.pop('sb')])
+
+        if kwargs.get('sf'):
+            fonts_and_ui.extend(['-sf', kwargs.pop('sf')])
+
+        return fonts_and_ui
+
     def _build_args(
         self,
         case_sensitive: bool = False,
@@ -54,22 +74,18 @@ class Dmenu:
         **kwargs,
     ) -> list[str]:
         args = shlex.split(self.command)
+        args.extend(['-p', prompt])
 
         if kwargs.get('lines'):
             args.extend(['-l', str(kwargs.pop('lines'))])
 
-        if prompt:
-            args.extend(['-p', prompt])
-
         if kwargs.get('bottom'):
-            kwargs.pop('bottom')
             args.append('-b')
 
         if not case_sensitive:
             args.append('-i')
 
-        if kwargs.get('font'):
-            args.extend(['-fn', kwargs.pop('font')])
+        args.extend(self._build_fonts_and_ui(kwargs))
 
         if multi_select:
             log.debug('not supported in dmenu: %s', 'multi-select')
