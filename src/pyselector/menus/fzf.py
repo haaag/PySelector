@@ -41,22 +41,33 @@ class Fzf:
     def command(self) -> str:
         return helpers.check_command(self.name, self.url)
 
-    def _build_args(  # noqa: C901
+    def _build_mesg(self, kwargs) -> list[str]:
+        header: list[str] = []
+
+        if kwargs.get('mesg'):
+            header.extend(shlex.split(shlex.quote(kwargs.pop('mesg'))))
+
+        for keybind in self.keybind.current:
+            if not keybind.hidden:
+                header.append(f'{constants.BULLET} Use <{keybind.bind}> {keybind.description}')
+
+        if len(header) == 0:
+            return header
+
+        mesg = '\n'.join(msg.replace('\n', ' ') for msg in header)
+        return shlex.split(shlex.quote(f'--header={mesg}'))
+
+    def _build_args(
         self,
         case_sensitive: bool = False,
         multi_select: bool = False,
         prompt: str = constants.PROMPT,
         **kwargs,
     ) -> list[str]:
-        header: list[str] = []
         args = shlex.split(self.command)
         args.append('--ansi')
-
-        if case_sensitive is not None:
-            args.append('+i' if case_sensitive else '-i')
-
-        if kwargs.get('mesg'):
-            header.extend(shlex.split(shlex.quote(kwargs.pop('mesg'))))
+        args.extend(['--prompt', prompt])
+        args.append('+i' if case_sensitive else '-i')
 
         if kwargs.pop('cycle', False):
             args.append('--cycle')
@@ -67,22 +78,13 @@ class Fzf:
         if 'height' in kwargs:
             args.extend(shlex.split(shlex.quote(f"--height={kwargs.pop('height')}")))
 
-        if prompt:
-            args.extend(['--prompt', prompt])
-
         if multi_select:
             args.append('--multi')
 
-        # FIX: Do keybinds for FZF
-        if self.keybind.current:
-            log.debug('Keybinds are disabled')
+        args.extend(self._build_mesg(kwargs))
 
         for arg, value in kwargs.items():
             log.debug("'%s=%s' not supported", arg, value)
-
-        if header:
-            mesg = '\n'.join(msg.replace('\n', ' ') for msg in header)
-            args.extend(shlex.split(shlex.quote(f'--header={mesg}')))
 
         if kwargs.pop('input', False):
             args.append('--print-query')
