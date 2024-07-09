@@ -48,7 +48,6 @@ def run(
         args,
         stdout=subprocess.PIPE,
         stdin=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
         text=True,
     ) as proc:
         input_items = '\n'.join(map(preprocessor, items))
@@ -57,6 +56,7 @@ def run(
 
     if not selected:
         return None, return_code
+
     selected = selected.strip()
 
     if return_code == UserCancel(1):

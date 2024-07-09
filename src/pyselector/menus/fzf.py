@@ -74,7 +74,7 @@ class Fzf:
             args.append('--multi')
 
         # FIX: Do keybinds for FZF
-        if self.keybind.list_keys:
+        if self.keybind.current:
             log.debug('Keybinds are disabled')
 
         for arg, value in kwargs.items():

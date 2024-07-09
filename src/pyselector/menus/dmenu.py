@@ -74,7 +74,7 @@ class Dmenu:
         if multi_select:
             log.debug('not supported in dmenu: %s', 'multi-select')
 
-        for key in self.keybind.list_keys:
+        for key in self.keybind.current:
             log.debug('key=%s not supported in dmenu', key)
 
         if kwargs:

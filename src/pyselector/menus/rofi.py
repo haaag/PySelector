@@ -116,7 +116,7 @@ class Rofi:
         if m:
             messages.extend(shlex.split(shlex.quote(m)))
 
-        for key in self.keybind.list_keys:
+        for key in self.keybind.current:
             if not key.hidden:
                 messages.append(f'{constants.BULLET} Use <{key.bind}> {key.description}')
 
@@ -131,10 +131,10 @@ class Rofi:
         return shlex.split(f"-theme-str 'textbox {{ markup: {markup};}}'")
 
     def _build_keybinds(self, args: list[str]) -> None:
-        if len(self.keybind.list_keys) == 0:
+        if len(self.keybind.current) == 0:
             return
 
-        for key in self.keybind.list_keys:
+        for key in self.keybind.current:
             args.extend(shlex.split(f'-kb-custom-{key.id} {key.bind}'))
 
     def _build_args(
@@ -237,7 +237,7 @@ class Rofi:
 
         if not result:
             log.debug('result is empty')
-            return selected, 1
+            return selected, UserCancel(1)
 
         return result, code
 

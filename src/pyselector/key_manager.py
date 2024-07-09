@@ -151,18 +151,18 @@ class KeyManager:
             self.register(k, exist_ok)
 
     @property
-    def list_keys(self) -> list[Keybind]:
+    def current(self) -> list[Keybind]:
         return list(self.keys.values())
 
     def hide_all(self) -> None:
         """Hides all keybinds."""
-        for key in self.list_keys:
+        for key in self.current:
             if not key.hidden:
                 key.hide()
 
     def toggle_all(self) -> None:
         """Toggles the "hidden" property of all non-hidden keybinds."""
-        for k in self.list_keys:
+        for k in self.current:
             k.hidden = not k.hidden
 
     def toggle_hidden(self, restore: bool = False) -> None:
@@ -171,7 +171,7 @@ class KeyManager:
         temporarily stores the original "hidden" state of each keybind.
         If `restore` is True, restores the original "hidden" state of each keybind.
         """
-        for key in self.list_keys:
+        for key in self.current:
             if not key.hidden:
                 key.toggle()
                 self.original_states.append(key)
@@ -183,7 +183,7 @@ class KeyManager:
 
     def hidden_keys(self) -> list[Keybind]:
         """Returns a list of all hidden keybinds."""
-        return [key for key in self.list_keys if key.hidden]
+        return [key for key in self.current if key.hidden]
 
     def get_by_code(self, code: int) -> Keybind:
         """
@@ -207,7 +207,7 @@ class KeyManager:
         Raises:
             KeybindError: If no keybind is found with the specified bind.
         """
-        for key in self.list_keys:
+        for key in self.current:
             if key.bind == bind:
                 log.debug(f'found keybind={key.bind}')
                 return key
@@ -235,7 +235,7 @@ class KeyManager:
         return [self.unregister(k.code) for k in key_list]
 
     def __str__(self) -> str:
-        return '\n'.join([str(k) for k in self.list_keys])
+        return '\n'.join([str(k) for k in self.current])
 
     def __repr__(self):
         return self.__str__()

@@ -82,7 +82,7 @@ def test_unregister_keybind(key_manager: KeyManager, test_keybind: tuple[str, st
     )
     key_manager.register(keybind)
     key_manager.unregister(keybind.code)
-    assert key_manager.list_keys == []
+    assert key_manager.current == []
 
 
 def test_unregister_keybind_error(key_manager: KeyManager) -> None:
@@ -95,7 +95,7 @@ def test_toggle_all_keybinds(key_manager: KeyManager) -> None:
     key_manager.add('CTRL+Z', 'Undo last action', lambda: None)
     key_manager.add('CTRL+X', 'Cut selected text', lambda: None)
     key_manager.toggle_all()
-    for keybind in key_manager.list_keys:
+    for keybind in key_manager.current:
         assert keybind.hidden
 
 
