@@ -6,8 +6,10 @@ import logging
 import re
 import shutil
 import subprocess
+from typing import IO
 from typing import Any
 from typing import Callable
+from typing import Iterable
 from typing import Sequence
 from typing import TypeVar
 
@@ -75,6 +77,40 @@ def remove_color_codes(text: str) -> str:
     Returns:
         str: The text with color codes removed.
     """
-
     color_code_pattern = r'\033\[[\d;]*m'
     return re.sub(color_code_pattern, '', text)
+
+
+def write_items_to_stdin(stdin: IO[bytes], items: Iterable[Any], encoding: str, preprocessor: Callable[..., Any]):
+    byte = None
+    newline_char = '\n'
+    return_char = '\r'
+    for item in items:
+        line = preprocessor(item)
+        byte = _check_byte_encoding(line, byte, newline_char, return_char)
+        if not byte:
+            line = line.encode(encoding)
+        stdin.write(line + b'\n')
+        stdin.flush()
+
+
+def _check_byte_encoding(line: Any, byte: bool | None, newline_char: str | bytes, return_char: str | bytes) -> bool:
+    if byte is None:
+        byte = isinstance(line, bytes)
+        if byte:
+            newline_char = b'\n'
+            return_char = b'\r'
+    elif isinstance(line, bytes) is not byte:
+        msg = f'element values must be all byte strings or all unicode strings, not mixed of them: {line}'
+        raise ValueError(msg)
+    if newline_char in line or return_char in line:
+        msg = rf'element values must not contain CR({return_char!r})/' rf'LF({newline_char!r}): {line!r}'
+        raise ValueError(msg)
+    return byte
+
+
+def read_output_from_stdout(stdout: IO[bytes], encoding: str) -> tuple[str, str]:
+    # FIX: type: mypy: "IO[bytes]" has no attribute "peek"
+    byte = isinstance(stdout.peek(1), bytes)  # type: ignore[attr-defined]
+    decode = (lambda b: b.decode(encoding)) if byte else (lambda t: t)
+    return tuple(decode(ln.strip(b'\r\n\0')) for ln in iter(stdout.readline, b''))

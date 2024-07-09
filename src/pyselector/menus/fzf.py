@@ -3,13 +3,19 @@ from __future__ import annotations
 
 import logging
 import shlex
+import subprocess
+import sys
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import Iterable
+from typing import Sequence
+from typing import TypeVar
 
 from pyselector import constants
 from pyselector import helpers
 from pyselector.interfaces import Arg
+from pyselector.interfaces import UserCancel
 from pyselector.key_manager import KeyManager
 
 if TYPE_CHECKING:
@@ -17,8 +23,9 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+T = TypeVar('T')
 FZF_INTERRUPTED_CODE = 130
-
+FZF_RETURN_CODE_START = 10
 SUPPORTED_ARGS: dict[str, Arg] = {
     'prompt': Arg('--prompt', 'set prompt', str),
     'cycle': Arg('--cycle', 'enable cyclic scroll', bool),
@@ -36,6 +43,7 @@ class Fzf:
         self.name = 'fzf'
         self.url = constants.HOMEPAGE_FZF
         self.keybind = KeyManager()
+        self.keybind.code_count = FZF_RETURN_CODE_START
 
     @property
     def command(self) -> str:
@@ -57,6 +65,66 @@ class Fzf:
         mesg = '\n'.join(msg.replace('\n', ' ') for msg in header)
         return shlex.split(shlex.quote(f'--header={mesg}'))
 
+    def _build_keybinds(self) -> list[str]:
+        keybinds: list[str] = []
+
+        for keybind in self.keybind.current:
+            # FIX: workaround to use keybinds in FZF
+            # the `--expect` arg, returns the keybind pressed
+            # TODO: read fzf's man and particularly `keybinds/events`
+            keybinds.extend(
+                [
+                    '--bind',
+                    f'{keybind.bind}:execute(echo {keybind.code})',
+                    f'--expect={keybind.bind}',
+                ],
+            )
+
+        return keybinds
+
+    def _check_keybind_pressed(self, selected: str, keycode: int) -> tuple[str, int]:
+        selected_with_keybind = 2
+        if keycode == FZF_INTERRUPTED_CODE:
+            return selected, keycode
+
+        for key in self.keybind.current:
+            selected_split = selected.split('\n')
+            if selected.startswith(key.bind) and len(selected_split) >= selected_with_keybind:
+                selected = selected_split[1]
+                keycode = key.code
+                break
+
+        return selected, keycode
+
+    def fzfrun(
+        self,
+        args: list[str],
+        items: Sequence[T],
+        preprocessor: Callable[..., Any],
+    ) -> tuple[str | None, int]:
+        log.debug('executing: %s', args)
+
+        with subprocess.Popen(
+            args,
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            text=True,
+        ) as proc:
+            input_items = '\n'.join(map(preprocessor, items))
+            selected, _ = proc.communicate(input=input_items)
+            return_code = proc.wait()
+
+        if not selected:
+            return None, return_code
+
+        selected, return_code = self._check_keybind_pressed(selected, return_code)
+
+        selected = selected.strip()
+        if return_code == UserCancel(1):
+            return selected, return_code
+
+        return selected, return_code
+
     def _build_args(
         self,
         case_sensitive: bool = False,
@@ -66,7 +134,7 @@ class Fzf:
     ) -> list[str]:
         args = shlex.split(self.command)
         args.append('--ansi')
-        args.extend(['--prompt', prompt])
+        args.append('--prompt=' + prompt)
         args.append('+i' if case_sensitive else '-i')
 
         if kwargs.pop('cycle', False):
@@ -82,6 +150,7 @@ class Fzf:
             args.append('--multi')
 
         args.extend(self._build_mesg(kwargs))
+        args.extend(self._build_keybinds())
 
         for arg, value in kwargs.items():
             log.debug("'%s=%s' not supported", arg, value)
@@ -92,6 +161,41 @@ class Fzf:
         return args
 
     def prompt(
+        self,
+        items: Iterable[T],
+        case_sensitive: bool = False,
+        multi_select: bool = False,
+        prompt: str = constants.PROMPT,
+        preprocessor: Callable[..., Any] = lambda x: str(x),
+        **kwargs,
+    ) -> PromptReturn:
+        encoding = sys.getdefaultencoding()
+        args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
+        proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None)
+        helpers.write_items_to_stdin(proc.stdin, items, encoding, preprocessor)
+        if proc.stdin is not None:
+            proc.stdin.close()
+
+        output = helpers.read_output_from_stdout(proc.stdout, encoding)
+        retcode = proc.wait()
+
+        if not output or retcode in (UserCancel(1), FZF_INTERRUPTED_CODE):
+            return None, UserCancel(1)
+
+        keybind_and_selected = 2
+        if len(output) == keybind_and_selected:
+            keybind, selected = output
+        else:
+            keybind, selected = '', output[0]
+
+        retcode = self.keybind.get_by_bind(keybind).code if keybind != '' else retcode
+        for item in items:
+            if helpers.remove_color_codes(preprocessor(item)) == selected:
+                selected = item
+                break
+        return selected, retcode
+
+    def this_prompt_works(
         self,
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool = False,
@@ -113,7 +217,7 @@ class Fzf:
             items = []
 
         args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
-        selected, code = helpers.run(args, items, preprocessor)
+        selected, code = self.fzfrun(args, items, preprocessor)
 
         if code == FZF_INTERRUPTED_CODE:
             return None, 1
