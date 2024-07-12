@@ -14,8 +14,8 @@ from typing import TypeVar
 
 from pyselector import constants
 from pyselector import helpers
+from pyselector.constants import UserCancel
 from pyselector.interfaces import Arg
-from pyselector.interfaces import UserCancel
 from pyselector.key_manager import KeyManager
 
 if TYPE_CHECKING:
@@ -160,6 +160,7 @@ class Fzf:
 
         return args
 
+    @helpers.deprecated("method will be deprecated. use 'select' method")
     def prompt(
         self,
         items: Iterable[T],

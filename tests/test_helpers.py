@@ -9,7 +9,7 @@ from typing import Union
 
 import pytest
 from pyselector import helpers
-from pyselector.interfaces import ExecutableNotFoundError
+from pyselector.exc import ExecutableNotFoundError
 
 
 class Case(NamedTuple):

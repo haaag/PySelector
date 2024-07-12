@@ -6,6 +6,8 @@ import logging
 import re
 import shutil
 import subprocess
+import warnings
+from functools import wraps
 from typing import IO
 from typing import Any
 from typing import Callable
@@ -13,8 +15,8 @@ from typing import Iterable
 from typing import Sequence
 from typing import TypeVar
 
-from pyselector.interfaces import ExecutableNotFoundError
-from pyselector.interfaces import UserCancel
+from pyselector.constants import UserCancel
+from pyselector.exc import ExecutableNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -114,3 +116,15 @@ def read_output_from_stdout(stdout: IO[bytes], encoding: str) -> tuple[str, str]
     byte = isinstance(stdout.peek(1), bytes)  # type: ignore[attr-defined]
     decode = (lambda b: b.decode(encoding)) if byte else (lambda t: t)
     return tuple(decode(ln.strip(b'\r\n\0')) for ln in iter(stdout.readline, b''))
+
+
+def deprecated(mesg: str) -> Callable[..., Any]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            warnings.warn(f'{func.__name__!r} {mesg}', DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

@@ -5,20 +5,18 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
-from typing import NewType
 from typing import Protocol
 from typing import Sequence
 from typing import TypeVar
 
 from pyselector import constants
+from pyselector import helpers
 
 if TYPE_CHECKING:
     from pyselector.key_manager import KeyManager
 
 T = TypeVar('T')
 PromptReturn = tuple[T, int]
-UserConfirms = NewType('UserConfirms', int)
-UserCancel = NewType('UserCancel', int)
 
 
 @dataclass
@@ -26,10 +24,6 @@ class Arg:
     param: str
     help: str
     type: type
-
-
-class ExecutableNotFoundError(Exception):
-    pass
 
 
 class MenuInterface(Protocol):
@@ -41,6 +35,7 @@ class MenuInterface(Protocol):
     def command(self) -> str:
         """Returns the command to execute for the menu."""
 
+    @helpers.deprecated("method will be deprecated. use 'select' method")
     def prompt(
         self,
         items: list[Any] | tuple[Any] | None = None,

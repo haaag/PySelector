@@ -98,6 +98,7 @@ class Dmenu:
                 log.debug("'%s=%s' not supported", arg, value)
         return args
 
+    @helpers.deprecated("method will be deprecated. use 'select' method")
     def prompt(
         self,
         items: Sequence[T] | None = None,
@@ -144,8 +145,8 @@ class Dmenu:
                 break
 
         if not result:
-            log.warning('result is empty')
-            return selected, 1
+            log.debug('result is empty')
+            return selected, constants.UserCancel(1)
 
         return result, code
 
@@ -181,8 +182,8 @@ class Dmenu:
                 break
 
         if not result:
-            log.warning('result is empty')
-            return selected, 1
+            log.debug('result is empty')
+            return selected, constants.UserCancel(1)
 
         return result, code
 
