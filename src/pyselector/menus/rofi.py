@@ -241,8 +241,66 @@ class Rofi:
 
         return result, code
 
-    def input(self, prompt: str = constants.PROMPT) -> str:
-        raise NotImplementedError
+    def select(
+        self,
+        items: Sequence[T] | None = None,
+        case_sensitive: bool = False,
+        multi_select: bool = False,
+        prompt: str = constants.PROMPT,
+        preprocessor: Callable[..., Any] = lambda x: str(x),
+        **kwargs,
+    ) -> PromptReturn:
+        """
+        Return Code Value
+            0: Row has been selected accepted by user.
+            1: User cancelled the selection.
+            10-28: Row accepted by custom keybinding.
+        """
+        helpers.check_type(items)
+
+        if items is None:
+            items = []
+
+        args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
+        selected, code = helpers.run(args, items, preprocessor)
+
+        if not selected or code == UserCancel(1):
+            return None, code
+
+        # 'multi-select' is not supported, for now
+        # if multi_select:
+        #     result = extract.items(items, selected, preprocessor)
+        # else:
+        #     result = extract.item(items, selected, preprocessor)
+
+        result: Any = None
+        for item in items:
+            if preprocessor(item) == selected:
+                result = item
+                break
+
+        if not result:
+            log.debug('result is empty')
+            return selected, UserCancel(1)
+
+        return result, code
+
+    def input(self, prompt: str = constants.PROMPT, **kwargs) -> str | None:
+        args = self._build_args(prompt=prompt, input=True, **kwargs)
+        selected, _ = helpers.run(args, [], lambda: None)
+        return selected
+
+    def confirm(
+        self,
+        question: str,
+        options: Sequence[str] = ('Yes', 'No'),
+        confirm_opts: Sequence[str] = ('Yes'),
+        **kwargs,
+    ) -> bool:
+        selected, _ = self.select(items=options, prompt=question, **kwargs)
+        if not selected:
+            return False
+        return selected in confirm_opts
 
     def supported(self) -> str:
         return '\n'.join(f'{k:<10} {v.type.__name__.upper():<5} {v.help}' for k, v in SUPPORTED_ARGS.items())

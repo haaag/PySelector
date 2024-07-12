@@ -44,7 +44,8 @@ omit = ["src/pyselector/interfaces.py"]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.mypy]
-show_error_codes = true
+hide_error_codes = false
+show_error_code_links = true
 show_error_context = true
 show_column_numbers = true
 enable_error_code = ["ignore-without-code"]

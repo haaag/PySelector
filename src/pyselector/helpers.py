@@ -67,7 +67,7 @@ def run(
     return selected, return_code
 
 
-def remove_color_codes(text: str) -> str:
+def remove_ansi_codes(text: str) -> str:
     """
     Removes ANSI escape codes representing color information from a string.
 

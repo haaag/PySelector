@@ -33,6 +33,6 @@ pip install pyselector
 
 ## 📓 TODO
 - [ ] Rename main functions in menus.
-- [ ] Add `select` function.
-- [ ] Add `input` function.
-- [ ] Add
+- [X] Add `select` function.
+- [X] Add `input` function.
+- [X] Add `confirm` function.

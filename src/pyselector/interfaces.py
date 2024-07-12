@@ -10,7 +10,7 @@ from typing import Protocol
 from typing import Sequence
 from typing import TypeVar
 
-from pyselector.constants import PROMPT
+from pyselector import constants
 
 if TYPE_CHECKING:
     from pyselector.key_manager import KeyManager
@@ -46,7 +46,7 @@ class MenuInterface(Protocol):
         items: list[Any] | tuple[Any] | None = None,
         case_sensitive: bool | None = None,
         multi_select: bool = False,
-        prompt: str = PROMPT,
+        prompt: str = constants.PROMPT,
         preprocessor: Callable[..., Any] = lambda x: str(x),
         **kwargs,
     ) -> PromptReturn: ...
@@ -56,13 +56,19 @@ class MenuInterface(Protocol):
         items: Sequence[T],
         hide_keys: bool = False,
         **kwargs,
-    ) -> T | None:
+    ) -> PromptReturn:
         """Shows items in the menu and returns the selected item"""
 
-    def input(self, prompt: str = PROMPT) -> str:
+    def input(self, prompt: str = constants.PROMPT, **kwargs) -> str | None:
         """Shows a prompt in the menu and returns the user's input"""
 
-    def confirm(self, question: str, options: Sequence[str]) -> bool:
+    def confirm(
+        self,
+        question: str,
+        options: Sequence[str] = ('Yes', 'No'),
+        confirm_opts: Sequence[str] = ('Yes'),
+        **kwargs,
+    ) -> bool:
         """Prompt the user with a question and a list of options."""
 
     def supported(self) -> str:

@@ -178,6 +178,7 @@ class Fzf:
 
         output = helpers.read_output_from_stdout(proc.stdout, encoding)
         retcode = proc.wait()
+        log.warning("output: '%s', retcode: '%s'", output, retcode)
 
         if not output or retcode in (UserCancel(1), FZF_INTERRUPTED_CODE):
             return None, UserCancel(1)
@@ -190,7 +191,7 @@ class Fzf:
 
         retcode = self.keybind.get_by_bind(keybind).code if keybind != '' else retcode
         for item in items:
-            if helpers.remove_color_codes(preprocessor(item)) == selected:
+            if helpers.remove_ansi_codes(preprocessor(item)) == selected:
                 selected = item
                 break
         return selected, retcode
@@ -228,7 +229,7 @@ class Fzf:
         result: Any = None
 
         for item in items:
-            if helpers.remove_color_codes(preprocessor(item)) == selected:
+            if helpers.remove_ansi_codes(preprocessor(item)) == selected:
                 result = item
                 break
 
@@ -238,8 +239,59 @@ class Fzf:
 
         return result, code
 
-    def input(self, prompt: str = constants.PROMPT) -> str:
-        raise NotImplementedError
+    def select(
+        self,
+        items: Iterable[T],
+        case_sensitive: bool = False,
+        multi_select: bool = False,
+        prompt: str = constants.PROMPT,
+        preprocessor: Callable[..., Any] = lambda x: str(x),
+        **kwargs,
+    ) -> PromptReturn:
+        # FIX: Split me...
+        encoding = sys.getdefaultencoding()
+        args = self._build_args(case_sensitive, multi_select, prompt, **kwargs)
+        proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None)
+        helpers.write_items_to_stdin(proc.stdin, items, encoding, preprocessor)
+        if proc.stdin is not None:
+            proc.stdin.close()
+
+        output = helpers.read_output_from_stdout(proc.stdout, encoding)
+        retcode = proc.wait()
+        log.warning("output: '%s', retcode: '%s'", output, retcode)
+
+        if not output or retcode in (UserCancel(1), FZF_INTERRUPTED_CODE):
+            return None, UserCancel(1)
+
+        keybind_and_selected = 2
+        if len(output) == keybind_and_selected:
+            keybind, selected = output
+        else:
+            keybind, selected = '', output[0]
+
+        retcode = self.keybind.get_by_bind(keybind).code if keybind != '' else retcode
+        for item in items:
+            if helpers.remove_ansi_codes(preprocessor(item)) == selected:
+                selected = item
+                break
+        return selected, retcode
+
+    def input(self, prompt: str = constants.PROMPT, **kwargs) -> str | None:
+        args = self._build_args(prompt=prompt, input=True, **kwargs)
+        selected, _ = helpers.run(args, [], lambda: None)
+        return selected
+
+    def confirm(
+        self,
+        question: str,
+        options: Sequence[str] = ('Yes', 'No'),
+        confirm_opts: Sequence[str] = ('Yes'),
+        **kwargs,
+    ) -> bool:
+        selected, _ = self.select(items=options, prompt=question, **kwargs)
+        if not selected:
+            return False
+        return selected in confirm_opts
 
     def supported(self) -> str:
         return '\n'.join(f'{k:<10} {v.type.__name__.upper():<5} {v.help}' for k, v in SUPPORTED_ARGS.items())
