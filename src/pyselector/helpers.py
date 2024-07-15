@@ -61,8 +61,7 @@ def run(
     if not selected:
         return None, return_code
 
-    selected = selected.strip()
-
+    selected = selected.rstrip('\n')
     if return_code == UserCancel(1):
         return selected, return_code
 

@@ -268,12 +268,7 @@ class Rofi:
         if not selected or code == UserCancel(1):
             return None, code
 
-        # 'multi-select' is not supported, for now
-        # if multi_select:
-        #     result = extract.items(items, selected, preprocessor)
-        # else:
-        #     result = extract.item(items, selected, preprocessor)
-
+        # FIX: find a better way to extract the selected item from items
         result: Any = None
         for item in items:
             if preprocessor(item) == selected:
