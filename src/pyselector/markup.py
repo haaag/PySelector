@@ -110,15 +110,7 @@ class PangoSpan:
 
         attrs = []
         for attr in self.__dict__:
-            if (
-                attr != 'text'
-                and attr != 'markup'
-                and attr != 'sub'
-                and attr != 'ansi'
-                and attr != 'fg_ansi'
-                and attr != 'bg_ansi'
-                and self.__dict__[attr] is not None
-            ):
+            if attr not in ('text', 'markup', 'sub', 'ansi', 'fg_ansi', 'bg_ansi') and self.__dict__[attr] is not None:
                 attrs.append(f'{attr}="{self.__dict__[attr]}"')
 
         text = self.text
