@@ -269,17 +269,27 @@ class Rofi:
             return None, code
 
         # FIX: find a better way to extract the selected item from items
-        result: Any = None
+        if multi_select:
+            result: list[T] = []
+            for i in items:
+                for j in selected.split('\n'):
+                    if preprocessor(i) == j:
+                        result.append(i)
+                        continue
+            return result, code
+
+        # FIX: find a better way to extract the selected item from items
+        found: Any = None
         for item in items:
             if preprocessor(item) == selected:
-                result = item
+                found = item
                 break
 
-        if not result:
+        if not found:
             log.debug('result is empty')
             return selected, UserCancel(1)
 
-        return result, code
+        return found, code
 
     def input(self, prompt: str = constants.PROMPT, **kwargs) -> str | None:
         args = self._build_args(prompt=prompt, input=True, **kwargs)
