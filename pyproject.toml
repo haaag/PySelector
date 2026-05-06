@@ -24,7 +24,7 @@ Source = "https://github.com/mateconpizza/pyselector"
 
 [project.optional-dependencies]
 dev = ["mypy==1.0.1", "ruff==0.0.257"]
-test = ["coverage[toml]<8.0,>=6.5", "pytest<8.0.0,>=7.1.3"]
+test = ["coverage[toml]<8.0,>=6.5", "pytest>=9.0.3"]
 
 [tool.hatch.version]
 path = "src/pyselector/__init__.py"
