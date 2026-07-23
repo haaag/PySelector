@@ -9,15 +9,13 @@
 
 </div>
 
-# PySelector (WIP)
-
-## 🌟 About
+# PySelector
 
 `pyselector` is a Python wrapper for the `rofi`, `dmenu`, `fzf` application,
 which provides a simple and efficient way to display a list of items for user
 selection.
 
-## 📦 Installation
+## Installation
 
 To install `pyselector`, you can use pip:
 
@@ -25,14 +23,8 @@ To install `pyselector`, you can use pip:
 pip install pyselector
 ```
 
-## 🔗 References
+## References
 
 - [dmenu](https://tools.suckless.org/dmenu/)
 - [Rofi](https://github.com/davatorium/rofi)
 - [fzf](https://github.com/junegunn/fzf) _(WIP)_
-
-## 📓 TODO
-- [ ] Rename main functions in menus.
-- [X] Add `select` function.
-- [X] Add `input` function.
-- [X] Add `confirm` function.

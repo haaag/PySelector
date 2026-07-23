@@ -265,7 +265,7 @@ wheels = [
 
 [[package]]
 name = "pyselector"
-version = "0.0.42"
+version = "0.0.43"
 source = { editable = "." }
 dependencies = [
     { name = "pillow" },
